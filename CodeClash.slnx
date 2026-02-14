@@ -1,6 +1,24 @@
 <Solution>
-  <Project Path="CodeClash.ApiService/CodeClash.ApiService.csproj" />
-  <Project Path="CodeClash.AppHost/CodeClash.AppHost.csproj" />
-  <Project Path="CodeClash.ServiceDefaults/CodeClash.ServiceDefaults.csproj" />
-  <Project Path="CodeClash.Web/CodeClash.Web.csproj" />
+  <Folder Name="/DockerFiles/" />
+  <Folder Name="/SolutionItems/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/AspireHost/">
+    <Project Path="src/Services/AspireHost/CodeClash.AppHost/CodeClash.AppHost.csproj" />
+    <Project Path="src/Services/AspireHost/CodeClash.ServiceDefaults/CodeClash.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/CodeClash.Identity/CodeClash.Identity.csproj" />
+  </Folder>
+  <Folder Name="/src/Coders/">
+    <Project Path="src/Services/Coders/ClashCode.Coders.Tests/ClashCode.Coders.Tests.csproj" />
+    <Project Path="src/Services/Coders/CodeClash.Coders.Messages/CodeClash.Coders.Messages.csproj" />
+    <Project Path="src/Services/Coders/CodeClash.Coders/CodeClash.Coders.csproj" />
+  </Folder>
+  <Folder Name="/src/Courses/">
+    <Project Path="src/Services/Courses/CodeClash.Courses.Messages/CodeClash.Courses.Messages.csproj" />
+    <Project Path="src/Services/Courses/CodeClash.Courses.Tests/CodeClash.Courses.Tests.csproj" />
+    <Project Path="src/Services/Courses/CodeClash.Courses/CodeClash.Courses.csproj" />
+  </Folder>
 </Solution>
