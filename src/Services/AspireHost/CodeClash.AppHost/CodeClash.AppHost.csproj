@@ -9,7 +9,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.Azure.Storage" />
         <PackageReference Include="Aspire.Hosting.MongoDB" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Coders\CodeClash.Coders\CodeClash.Coders.csproj" />
+      <ProjectReference Include="..\..\Courses\CodeClash.Courses\CodeClash.Courses.csproj" />
+      <ProjectReference Include="..\CodeClash.Shared\CodeClash.Shared.csproj" IsAspireProjectResource="false" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Utilities\CodeClash.Utilities.csproj" IsAspireProjectResource="false" />
     </ItemGroup>
 
 </Project>

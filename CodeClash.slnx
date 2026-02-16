@@ -7,18 +7,23 @@
   <Folder Name="/src/AspireHost/">
     <Project Path="src/Services/AspireHost/CodeClash.AppHost/CodeClash.AppHost.csproj" />
     <Project Path="src/Services/AspireHost/CodeClash.ServiceDefaults/CodeClash.ServiceDefaults.csproj" />
+    <Project Path="src/Services/AspireHost/CodeClash.Shared/CodeClash.Shared.csproj" />
   </Folder>
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/CodeClash.Identity/CodeClash.Identity.csproj" />
+    <Project Path="src/BuildingBlocks/CodeClash.Utilities/CodeClash.Utilities.csproj" />
   </Folder>
   <Folder Name="/src/Coders/">
-    <Project Path="src/Services/Coders/ClashCode.Coders.Tests/ClashCode.Coders.Tests.csproj" />
     <Project Path="src/Services/Coders/CodeClash.Coders.Messages/CodeClash.Coders.Messages.csproj" />
+    <Project Path="src/Services/Coders/CodeClash.Coders.Tests/CodeClash.Coders.Tests.csproj" />
     <Project Path="src/Services/Coders/CodeClash.Coders/CodeClash.Coders.csproj" />
   </Folder>
   <Folder Name="/src/Courses/">
     <Project Path="src/Services/Courses/CodeClash.Courses.Messages/CodeClash.Courses.Messages.csproj" />
     <Project Path="src/Services/Courses/CodeClash.Courses.Tests/CodeClash.Courses.Tests.csproj" />
     <Project Path="src/Services/Courses/CodeClash.Courses/CodeClash.Courses.csproj" />
+  </Folder>
+  <Folder Name="/src/Gateway/">
+    <Project Path="src/CodeClash.Gateway/CodeClash.Gateway.csproj" />
   </Folder>
 </Solution>
