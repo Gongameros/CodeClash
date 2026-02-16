@@ -1,6 +1,10 @@
 using CodeClash.Identity.Extensions;
+using CodeClash.ServiceDefaults;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 // Add Keycloak authentication
 builder.Services.AddKeycloakAuthentication(builder.Configuration);
@@ -15,12 +19,18 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "CodeClash.Coders API documentation";
+        options.Theme = ScalarTheme.DeepSpace;
+    });
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapDefaultEndpoints();
+
 
 var summaries = new[]
 {

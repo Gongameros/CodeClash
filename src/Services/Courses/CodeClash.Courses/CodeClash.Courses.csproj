@@ -4,14 +4,18 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <UserSecretsId>0d2e6383-1d45-465e-a063-913d3c6159c7</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
+      <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Identity\CodeClash.Identity.csproj" />
+      <ProjectReference Include="..\..\AspireHost\CodeClash.ServiceDefaults\CodeClash.ServiceDefaults.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Identity\CodeClash.Identity.csproj" />
+      <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+      <PackageReference Include="Scalar.AspNetCore.Microsoft" />
     </ItemGroup>
 
 </Project>

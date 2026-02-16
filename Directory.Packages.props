@@ -19,11 +19,11 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
+    <!-- Scalar -->
+    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.12.41" />
     <!-- MongoDB -->
     <PackageVersion Include="MongoDB.Driver" Version="3.6.0" />
     <!-- Wolverine -->
-    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.3" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.3" />
     <PackageVersion Include="WolverineFx" Version="5.15.0" />
     <PackageVersion Include="WolverineFx.Http" Version="5.15.0" />
     <!-- FluentValidation -->

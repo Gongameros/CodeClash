@@ -1,7 +1,8 @@
 <Solution>
-  <Folder Name="/DockerFiles/" />
   <Folder Name="/SolutionItems/">
+    <File Path=".dockerignore" />
     <File Path=".editorconfig" />
+    <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/AspireHost/">
@@ -24,6 +25,6 @@
     <Project Path="src/Services/Courses/CodeClash.Courses/CodeClash.Courses.csproj" />
   </Folder>
   <Folder Name="/src/Gateway/">
-    <Project Path="src/CodeClash.Gateway/CodeClash.Gateway.csproj" />
+    <Project Path="src/Services/Gateway/CodeClash.Gateway/CodeClash.Gateway.csproj" />
   </Folder>
 </Solution>

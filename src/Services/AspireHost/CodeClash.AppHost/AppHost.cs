@@ -14,12 +14,18 @@ var codersBlobStorage = storage.AddBlobStorageResource(Resources.CodersBlob);
 var coursesBlobStorage = storage.AddBlobStorageResource(Resources.CoursesBlob);
 
 builder.AddProject<Projects.CodeClash_Coders>(Resources.CodersService)
+    .WithExternalHttpEndpoints()
+    .WithHttpHealthCheck("/health")
+    .WithScalar()
     .WaitFor(codersBlobStorage)
     .WaitFor(mongoDb)
     .WithReference(codersBlobStorage)
     .WithReference(mongoDb);
 
 builder.AddProject<Projects.CodeClash_Courses>(Resources.CoursesService)
+    .WithExternalHttpEndpoints()
+    .WithHttpHealthCheck("/health")
+    .WithScalar()
     .WaitFor(coursesBlobStorage)
     .WaitFor(mongoDb)
     .WithReference(coursesBlobStorage)
