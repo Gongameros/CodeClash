@@ -11,6 +11,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Identity\CodeClash.Identity.csproj" />
       <ProjectReference Include="..\..\AspireHost\CodeClash.ServiceDefaults\CodeClash.ServiceDefaults.csproj" />
+      <ProjectReference Include="..\..\AspireHost\CodeClash.Shared\CodeClash.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>

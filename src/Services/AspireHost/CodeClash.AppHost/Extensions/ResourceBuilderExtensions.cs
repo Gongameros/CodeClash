@@ -11,9 +11,7 @@ internal static class ResourceBuilderExtensions
             return builder.WithOpenApiDocs("scalar-docs", "Scalar API Documentation", "scalar/v1");
         }
 
-        private IResourceBuilder<T> WithOpenApiDocs(string name,
-            string displayName,
-            string openApiUiPath)
+        private IResourceBuilder<T> WithOpenApiDocs(string name, string displayName, string openApiUiPath)
         {
             return builder.WithCommand(name,
                 displayName,

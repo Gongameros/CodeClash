@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using CodeClash.Identity.Extensions;
 using CodeClash.ServiceDefaults;
+using CodeClash.Shared.Constants;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Add Keycloak authentication
-builder.Services.AddKeycloakAuthentication(builder.Configuration);
+builder.AddKeycloakAuthentication(Resources.Keycloak);
 builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
@@ -51,6 +53,13 @@ app.MapGet("/weatherforecast", () =>
     })
     .WithName("GetWeatherForecast")
     .RequireAuthorization();
+
+app.MapGet("users/me", (ClaimsPrincipal claimsPrincipal) =>
+    {
+        return claimsPrincipal.Claims.ToDictionary(c => c.Type, c => c.Value);
+    })
+    .RequireAuthorization();
+
 
 app.Run();
 

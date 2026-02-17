@@ -7,9 +7,12 @@ var builder = DistributedApplication.CreateBuilder(args);
 // Build service provider for accessing validated options
 ServiceProvider serviceProvider = builder.Services.BuildServiceProvider();
 
+var keycloak = builder.AddKeycloakResource();
+
 var mongoDb = builder.AddMongoDbResource();
 
 var storage = builder.AddAzureStorageResource();
+
 var codersBlobStorage = storage.AddBlobStorageResource(Resources.CodersBlob);
 var coursesBlobStorage = storage.AddBlobStorageResource(Resources.CoursesBlob);
 
@@ -19,8 +22,10 @@ builder.AddProject<Projects.CodeClash_Coders>(Resources.CodersService)
     .WithScalar()
     .WaitFor(codersBlobStorage)
     .WaitFor(mongoDb)
+    .WaitFor(keycloak)
     .WithReference(codersBlobStorage)
-    .WithReference(mongoDb);
+    .WithReference(mongoDb)
+    .WithReference(keycloak);
 
 builder.AddProject<Projects.CodeClash_Courses>(Resources.CoursesService)
     .WithExternalHttpEndpoints()
@@ -28,7 +33,9 @@ builder.AddProject<Projects.CodeClash_Courses>(Resources.CoursesService)
     .WithScalar()
     .WaitFor(coursesBlobStorage)
     .WaitFor(mongoDb)
+    .WaitFor(keycloak)
     .WithReference(coursesBlobStorage)
-    .WithReference(mongoDb);
+    .WithReference(mongoDb)
+    .WithReference(keycloak);
 
 builder.Build().Run();

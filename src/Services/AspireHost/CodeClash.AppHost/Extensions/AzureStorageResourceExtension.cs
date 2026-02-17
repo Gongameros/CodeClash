@@ -7,6 +7,7 @@ namespace CodeClash.AppHost.Extensions;
 public static class AzureStorageResourceExtension
 {
     private const int BlobPort = 10000;
+
     public static IResourceBuilder<AzureBlobStorageResource> AddBlobStorageResource(
         this IResourceBuilder<AzureStorageResource> storage, string blobStorageName)
     {
