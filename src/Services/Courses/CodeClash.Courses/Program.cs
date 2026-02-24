@@ -13,6 +13,8 @@ builder.AddServiceDefaults();
 builder.AddKeycloakAuthentication(Resources.Keycloak);
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddDependencyInjection();
+
 // Add services to the container.
 builder.Services.AddOpenApi(options =>
 {
@@ -46,41 +48,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapDefaultEndpoints();
-
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .RequireAuthorization();
-
-app.MapGet("users/me", (ClaimsPrincipal claimsPrincipal) =>
-    {
-        return claimsPrincipal.Claims
-            .GroupBy(c => c.Type)
-            .ToDictionary(g => g.Key, g => g.Count() == 1
-                ? g.First().Value
-                : string.Join(", ", g.Select(c => c.Value)));
-    })
-    .RequireAuthorization();
+app.MapEndpoints();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

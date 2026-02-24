@@ -9,14 +9,12 @@
     <ItemGroup>
         <PackageReference Include="Aspire.Azure.Security.KeyVault" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
         <PackageReference Include="Yarp.ReverseProxy" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Services\AspireHost\CodeClash.ServiceDefaults\CodeClash.ServiceDefaults.csproj" />
-      <ProjectReference Include="..\Services\AspireHost\CodeClash.Shared\CodeClash.Shared.csproj" />
+      <ProjectReference Include="..\..\AspireHost\CodeClash.ServiceDefaults\CodeClash.ServiceDefaults.csproj" />
+      <ProjectReference Include="..\..\AspireHost\CodeClash.Shared\CodeClash.Shared.csproj" />
     </ItemGroup>
 
 </Project>
