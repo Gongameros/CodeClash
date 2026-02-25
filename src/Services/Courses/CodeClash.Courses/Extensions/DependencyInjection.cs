@@ -1,5 +1,4 @@
-using CodeClash.Courses.Shared.Validations;
-using Mediator;
+using CodeClash.Utilities.Validation;
 
 namespace CodeClash.Courses.Extensions;
 
@@ -12,8 +11,7 @@ public static class DependencyInjection
             options.ServiceLifetime = ServiceLifetime.Scoped;
         });
 
-        services.AddValidators();
-        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddValidation();
         return services;
     }
 }

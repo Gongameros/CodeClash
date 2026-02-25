@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents the outcome of an operation that does not return a value.
 /// </summary>
-public class Result
+public class Result : IResultFactory<Result>
 {
     protected Result(bool isSuccess, params Error[] errors)
     {
@@ -29,7 +29,7 @@ public class Result
     /// For most failures this contains a single error.
     /// For validation failures it may contain multiple.
     /// </summary>
-    public Error[] Errors { get; } = [];
+    public Error[] Errors { get; }
 
     /// <summary>
     /// The first (or only) error. Convenience accessor.
@@ -49,7 +49,7 @@ public class Result
 /// <summary>
 /// Represents the outcome of an operation that returns a value of type <typeparamref name="TValue"/>.
 /// </summary>
-public class Result<TValue> : Result
+public class Result<TValue> : Result, IResultFactory<Result<TValue>>
 {
     internal Result(TValue? value, bool isSuccess, params Error[] errors)
         : base(isSuccess, errors)
@@ -63,4 +63,7 @@ public class Result<TValue> : Result
 
     public static implicit operator Result<TValue>(TValue? value) =>
         value is not null ? Success(value) : Failure<TValue>(Error.NullValue);
+
+    static Result<TValue> IResultFactory<Result<TValue>>.ValidationFailure(params Error[] errors) =>
+        new(default, false, errors);
 }

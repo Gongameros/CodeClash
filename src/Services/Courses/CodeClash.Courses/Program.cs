@@ -1,9 +1,10 @@
-using System.Security.Claims;
 using CodeClash.Courses.Extensions;
 using CodeClash.Identity.Extensions;
 using CodeClash.ServiceDefaults;
 using CodeClash.Shared.Constants;
+using CodeClash.Utilities.Endpoints;
 using Scalar.AspNetCore;
+using HttpEndpointServiceCollectionExtensions = CodeClash.Courses.Extensions.HttpEndpointServiceCollectionExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapDefaultEndpoints();
-app.MapEndpoints();
+HttpEndpointServiceCollectionExtensions.MapEndpoints(app);
 
 app.Run();

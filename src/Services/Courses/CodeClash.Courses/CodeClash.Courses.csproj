@@ -11,13 +11,12 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Identity\CodeClash.Identity.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Results\CodeClash.Results.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Utilities\CodeClash.Utilities.csproj" />
       <ProjectReference Include="..\..\AspireHost\CodeClash.ServiceDefaults\CodeClash.ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\AspireHost\CodeClash.Shared\CodeClash.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FluentValidation" />
-      <PackageReference Include="Mediator.Abstractions" />
       <PackageReference Include="Mediator.SourceGenerator">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

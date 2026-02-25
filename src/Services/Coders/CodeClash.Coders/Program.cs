@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CodeClash.Coders.Extensions;
 using CodeClash.Identity.Extensions;
 using CodeClash.ServiceDefaults;
 using CodeClash.Shared.Constants;
@@ -11,6 +12,7 @@ builder.AddServiceDefaults();
 // Add Keycloak authentication
 builder.AddKeycloakAuthentication(Resources.Keycloak);
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddDependencyInjection();
 
 // Add services to the container.
 builder.Services.AddOpenApi();

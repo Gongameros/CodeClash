@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace CodeClash.Utilities.Extensions;
+namespace CodeClash.Utilities.Options;
 
 /// <summary>
 /// Provides extension methods for registering and validating options

@@ -1,7 +1,7 @@
-using CodeClash.Courses.Shared.Endpoint;
 using CodeClash.Results;
+using CodeClash.Utilities.Endpoints;
+using CodeClash.Utilities.Messaging;
 using FluentValidation;
-using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CodeClash.Courses.Features.Courses.GetCoderCourses;
@@ -13,7 +13,7 @@ public sealed record CourseResponse(
     decimal Price);
 
 public sealed record GetCoursesQuery(int Page = 1, int PageSize = 10)
-    : Shared.Messaging.IQuery<IReadOnlyList<CourseResponse>>;
+    : IQuery<IReadOnlyList<CourseResponse>>;
 
 public sealed class GetCoursesQueryValidator : AbstractValidator<GetCoursesQuery>
 {
@@ -29,7 +29,7 @@ public sealed class GetCoursesQueryValidator : AbstractValidator<GetCoursesQuery
     }
 }
 
-public sealed class GetCoursesHandler : Shared.Messaging.IQueryHandler<GetCoursesQuery, IReadOnlyList<CourseResponse>>
+public sealed class GetCoursesHandler : IQueryHandler<GetCoursesQuery, IReadOnlyList<CourseResponse>>
 {
     private static readonly List<CourseResponse> Courses =
     [
@@ -63,7 +63,7 @@ public class GetCoursesEndpoint : IEndpoint
     private static async Task<IResult> Handle(
         [FromQuery] int page,
         [FromQuery] int pageSize,
-        IMediator mediator,
+        Mediator.IMediator mediator,
         CancellationToken cancellationToken)
     {
         return (await mediator.Send(new GetCoursesQuery(page, pageSize), cancellationToken)).ToProblemDetails();

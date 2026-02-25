@@ -1,7 +1,7 @@
 using CodeClash.Utilities.Endpoints;
 using ServiceScan.SourceGenerator;
 
-namespace CodeClash.Courses.Extensions;
+namespace CodeClash.Coders.Extensions;
 
 public static partial class HttpEndpointServiceCollectionExtensions
 {

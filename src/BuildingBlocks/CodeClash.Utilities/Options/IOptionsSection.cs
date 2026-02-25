@@ -1,4 +1,4 @@
-﻿namespace CodeClash.Utilities;
+﻿namespace CodeClash.Utilities.Options;
 
 /// <summary>
 /// Represents a contract for strongly typed options that define

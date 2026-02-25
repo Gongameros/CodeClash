@@ -1,5 +1,5 @@
 ﻿using CodeClash.Utilities;
-using CodeClash.Utilities.Extensions;
+using CodeClash.Utilities.Options;
 using Microsoft.Extensions.Options;
 
 namespace CodeClash.AppHost.Extensions;
