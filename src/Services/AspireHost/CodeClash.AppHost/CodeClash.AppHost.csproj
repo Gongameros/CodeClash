@@ -18,6 +18,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Coders\CodeClash.Coders\CodeClash.Coders.csproj" />
       <ProjectReference Include="..\..\Courses\CodeClash.Courses\CodeClash.Courses.csproj" />
+      <ProjectReference Include="..\..\Gateway\CodeClash.Gateway\CodeClash.Gateway.csproj" />
       <ProjectReference Include="..\CodeClash.Shared\CodeClash.Shared.csproj" IsAspireProjectResource="false" />
       <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Utilities\CodeClash.Utilities.csproj" IsAspireProjectResource="false" />
     </ItemGroup>

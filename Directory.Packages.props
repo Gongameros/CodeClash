@@ -24,6 +24,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
     <!-- Scalar -->
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.12.41" />
     <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.12.41" />
     <!-- Wolverine -->
     <PackageVersion Include="ServiceScan.SourceGenerator" Version="2.4.1" />

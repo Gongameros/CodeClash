@@ -6,9 +6,10 @@ internal static class ResourceBuilderExtensions
 {
     extension<T>(IResourceBuilder<T> builder) where T : IResourceWithEndpoints
     {
-        internal IResourceBuilder<T> WithScalar()
+        internal IResourceBuilder<T> WithScalar(string path = "scalar/v1", string displayName = "Scalar API Documentation")
         {
-            return builder.WithOpenApiDocs("scalar-docs", "Scalar API Documentation", "scalar/v1");
+            var name = path.Replace("/", "-");
+            return builder.WithOpenApiDocs(name, displayName, path);
         }
 
         private IResourceBuilder<T> WithOpenApiDocs(string name, string displayName, string openApiUiPath)

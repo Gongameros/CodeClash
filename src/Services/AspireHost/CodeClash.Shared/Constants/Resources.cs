@@ -2,6 +2,7 @@
 
 public static class Resources
 {
+    public const string GatewayService = "codeclash-gateway";
     public const string CoursesService = "codeclash-courses";
     public const string CodersService = "codeclash-coders";
     public const string KeyVault = "codeclash-keyvault";
