@@ -9,7 +9,7 @@ ServiceProvider serviceProvider = builder.Services.BuildServiceProvider();
 
 var keycloak = builder.AddKeycloakResource();
 
-var mongoDb = builder.AddMongoDbResource();
+var mongoDb = builder.AddMongoDbResource(Resources.MongoDb);
 
 var storage = builder.AddAzureStorageResource();
 

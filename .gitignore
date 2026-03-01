@@ -498,3 +498,6 @@ input.output.css
 local.settings.json
 local.settings.*.json
 !local.settings.template.json
+
+# AI
+.claude/

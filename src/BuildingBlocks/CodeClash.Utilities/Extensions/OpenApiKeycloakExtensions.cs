@@ -1,8 +1,9 @@
 ﻿using CodeClash.Identity;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi;
 
-namespace CodeClash.Courses.Extensions;
+namespace CodeClash.Utilities.Extensions;
 
 // TODO: Refactoring
 public static class OpenApiKeycloakExtensions

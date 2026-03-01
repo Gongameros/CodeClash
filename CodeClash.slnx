@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/CodeClash.Identity/CodeClash.Identity.csproj" />
+    <Project Path="src/BuildingBlocks/CodeClash.MongoDB/CodeClash.MongoDB.csproj" />
     <Project Path="src/BuildingBlocks/CodeClash.Utilities/CodeClash.Utilities.csproj" />
     <Project Path="src\BuildingBlocks\CodeClash.Results\CodeClash.Results.csproj" />
   </Folder>

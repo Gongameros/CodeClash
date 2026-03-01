@@ -1,15 +1,25 @@
+using CodeClash.MongoDB.Extensions;
+
 namespace CodeClash.Coders.Extensions;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddDependencyInjection(this IServiceCollection services)
+    private const string DatabaseName = "coders-db";
+    public static IHostApplicationBuilder AddDependencyInjection(this IHostApplicationBuilder builder)
     {
-        services.AddMediator(options =>
+        builder.Services.AddMediator(options =>
         {
             options.ServiceLifetime = ServiceLifetime.Scoped;
         });
 
-        services.AddValidation();
-        return services;
+        builder.Services.AddValidation();
+        return builder;
+    }
+
+    public static IHostApplicationBuilder AddMongoDb(this IHostApplicationBuilder builder)
+    {
+        builder.AddMongoDb(DatabaseName);
+
+        return builder;
     }
 }

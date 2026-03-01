@@ -11,6 +11,7 @@
     <PackageVersion Include="Aspire.MongoDB.Driver" Version="13.1.1" />
     <PackageVersion Include="Mediator.Abstractions" Version="3.0.1" />
     <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.3.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.3" />
@@ -24,8 +25,6 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
     <!-- Scalar -->
     <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.12.41" />
-    <!-- MongoDB -->
-    <PackageVersion Include="MongoDB.Driver" Version="3.6.0" />
     <!-- Wolverine -->
     <PackageVersion Include="ServiceScan.SourceGenerator" Version="2.4.1" />
     <PackageVersion Include="WolverineFx" Version="5.15.0" />

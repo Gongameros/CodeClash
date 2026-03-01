@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="FluentValidation" />
       <PackageReference Include="Mediator.Abstractions" />
+      <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
       <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
@@ -19,6 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CodeClash.Identity\CodeClash.Identity.csproj" />
       <ProjectReference Include="..\CodeClash.Results\CodeClash.Results.csproj" />
     </ItemGroup>
 

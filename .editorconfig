@@ -87,7 +87,6 @@ dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = false
 
 # Code file-block preferences
-csharp_prefer_braces = true:warning
 csharp_style_namespace_declarations = file_scoped:warning
 csharp_style_prefer_method_group_conversion = true
 csharp_style_prefer_primary_constructors = true

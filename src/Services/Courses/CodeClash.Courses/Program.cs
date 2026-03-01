@@ -2,9 +2,8 @@ using CodeClash.Courses.Extensions;
 using CodeClash.Identity.Extensions;
 using CodeClash.ServiceDefaults;
 using CodeClash.Shared.Constants;
-using CodeClash.Utilities.Endpoints;
+using CodeClash.Utilities.Extensions;
 using Scalar.AspNetCore;
-using HttpEndpointServiceCollectionExtensions = CodeClash.Courses.Extensions.HttpEndpointServiceCollectionExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +13,8 @@ builder.AddServiceDefaults();
 builder.AddKeycloakAuthentication(Resources.Keycloak);
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddDependencyInjection();
+builder.AddMongoDb();
+builder.AddDependencyInjection();
 
 // Add services to the container.
 builder.Services.AddOpenApi(options =>
@@ -49,6 +49,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapDefaultEndpoints();
-HttpEndpointServiceCollectionExtensions.MapEndpoints(app);
+app.MapEndpoints();
 
 app.Run();
