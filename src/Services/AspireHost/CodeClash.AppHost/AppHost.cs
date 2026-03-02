@@ -20,7 +20,7 @@ var coursesBlobStorage = storage.AddBlobStorageResource(Resources.CoursesBlob);
 
 var coders = builder.AddProject<Projects.CodeClash_Coders>(Resources.CodersService)
     .WithHttpHealthCheck("/health")
-    .WithScalar("scalar/coders", "Scalar - Coders API")
+    .WithScalar("scalar", "Scalar - Coders API")
     .WaitFor(codersBlobStorage)
     .WaitFor(mongoDb)
     .WaitFor(keycloak)
@@ -31,7 +31,7 @@ var coders = builder.AddProject<Projects.CodeClash_Coders>(Resources.CodersServi
 
 var courses = builder.AddProject<Projects.CodeClash_Courses>(Resources.CoursesService)
     .WithHttpHealthCheck("/health")
-    .WithScalar("scalar/courses", "Scalar - Courses API")
+    .WithScalar("scalar", "Scalar - Courses API")
     .WaitFor(coursesBlobStorage)
     .WaitFor(mongoDb)
     .WaitFor(keycloak)
