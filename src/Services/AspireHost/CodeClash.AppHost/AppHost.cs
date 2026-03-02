@@ -45,6 +45,8 @@ builder.AddProject<Projects.CodeClash_Gateway>(Resources.GatewayService)
     .WithHttpHealthCheck("/health")
     .WithScalar("scalar/courses", "Scalar - Courses API")
     .WithScalar("scalar/coders", "Scalar - Coders API")
+    .WaitFor(coders)
+    .WaitFor(courses)
     .WithReference(courses)
     .WithReference(coders)
     .WithEnvironment("InternalApiKey", internalApiKey);
