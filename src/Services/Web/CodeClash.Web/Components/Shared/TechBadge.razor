@@ -1,0 +1,23 @@
+<MudChip T="string"
+         Size="Size.Small"
+         Variant="Variant.Outlined"
+         Color="Color.Primary"
+         Style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;">
+    @GetDisplayName()
+</MudChip>
+
+@code {
+    [Parameter, EditorRequired] public CodingTechnology Technology { get; set; }
+
+    private string GetDisplayName() => Technology switch
+    {
+        CodingTechnology.CSharp => "C#",
+        CodingTechnology.CPlusPlus => "C++",
+        CodingTechnology.FSharp => "F#",
+        CodingTechnology.JavaScript => "JS",
+        CodingTechnology.TypeScript => "TS",
+        CodingTechnology.VisualBasic => "VB",
+        CodingTechnology.ObjectiveC => "ObjC",
+        _ => Technology.ToString()
+    };
+}

@@ -5,6 +5,7 @@ public static class Resources
     public const string GatewayService = "codeclash-gateway";
     public const string CoursesService = "codeclash-courses";
     public const string CodersService = "codeclash-coders";
+    public const string WebService = "codeclash-web";
     public const string KeyVault = "codeclash-keyvault";
     public const string Storage = "codeclash-storage";
     public const string MongoDb = "codeclash-mongo-server";

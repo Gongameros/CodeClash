@@ -8,7 +8,7 @@ public sealed class GetCoursesEndpoint : IEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapGetWithAuth("/api/courses", Handle)
+        builder.MapGet("/api/courses", Handle)
             .WithName("GetCourses")
             .WithTags("Courses");
     }

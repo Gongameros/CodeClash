@@ -1,0 +1,275 @@
+@page "/courses/{courseId}/modules/{moduleId}/lessons/{lessonId}/edit"
+
+@inject ICoursesApiClient CoursesApi
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Edit Lesson – CodeClash</PageTitle>
+
+@if (_loading)
+{
+    <MudSkeleton Width="300px" Height="40px" Class="mb-4" />
+    <MudSkeleton Width="100%" Height="500px" Style="border-radius: 12px;" />
+}
+else if (_lesson is null)
+{
+    <MudAlert Severity="Severity.Error">Lesson not found.</MudAlert>
+}
+else
+{
+    <MudBreadcrumbs Items="_breadcrumbs" Class="mb-4 px-0" />
+
+    <div class="d-flex align-center justify-space-between mb-6">
+        <div>
+            <MudText Typo="Typo.h4" Style="font-weight: 700;">Edit Lesson</MudText>
+            <div class="d-flex align-center gap-2 mt-1">
+                <LessonTypeIcon Type="_lesson.Type" />
+                <MudText Typo="Typo.body2" Color="Color.Secondary">@_lesson.Type.ToString()</MudText>
+            </div>
+        </div>
+        <MudButton Href="@($"/courses/{CourseId}")" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack">
+            Back to Course
+        </MudButton>
+    </div>
+
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudPaper Class="pa-6" Elevation="2" Style="border-radius: 16px;">
+                <MudStack Spacing="4">
+                    <!-- Common fields -->
+                    <MudTextField @bind-Value="_form.Title"
+                                  Label="Lesson Title"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  Counter="150"
+                                  MaxLength="150" />
+
+                    <MudGrid>
+                        <MudItem xs="12" sm="6">
+                            <MudSelect T="LessonType" @bind-Value="_form.Type"
+                                       Label="Lesson Type"
+                                       Variant="Variant.Outlined">
+                                <MudSelectItem Value="LessonType.Theory">
+                                    <div class="d-flex align-center gap-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Small" Color="Color.Info" />
+                                        Theory
+                                    </div>
+                                </MudSelectItem>
+                                <MudSelectItem Value="LessonType.CodingChallenge">
+                                    <div class="d-flex align-center gap-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" Color="Color.Success" />
+                                        Coding Challenge
+                                    </div>
+                                </MudSelectItem>
+                                <MudSelectItem Value="LessonType.Quiz">
+                                    <div class="d-flex align-center gap-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.Quiz" Size="Size.Small" Color="Color.Warning" />
+                                        Quiz
+                                    </div>
+                                </MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudNumericField @bind-Value="_form.Order"
+                                             Label="Order"
+                                             Variant="Variant.Outlined"
+                                             Min="0"
+                                             HelperText="Position within the module" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <!-- Theory content -->
+                    @if (_form.Type == LessonType.Theory)
+                    {
+                        <div>
+                            <MudText Typo="Typo.subtitle2" Class="mb-2">
+                                Content
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Class="ml-2">Markdown supported</MudChip>
+                            </MudText>
+                            <MudTextField @bind-Value="_form.Content"
+                                          Variant="Variant.Outlined"
+                                          Lines="16"
+                                          Placeholder="Write your lesson content in Markdown...&#10;&#10;## Introduction&#10;&#10;You can use **bold**, *italic*, `code`, and more."
+                                          Style="font-family: 'JetBrains Mono', monospace; font-size: 0.875rem;" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(_form.Content))
+                        {
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">Preview</MudText>
+                                <MudPaper Class="pa-4" Elevation="0"
+                                          Style="border: 1px solid var(--mud-palette-divider); border-radius: 8px; min-height: 100px;">
+                                    <div class="markdown-preview">
+                                        @((MarkupString)RenderMarkdown(_form.Content))
+                                    </div>
+                                </MudPaper>
+                            </div>
+                        }
+                    }
+
+                    <!-- Coding Challenge info -->
+                    @if (_form.Type == LessonType.CodingChallenge)
+                    {
+                        @if (_lesson.Challenge is not null)
+                        {
+                            <MudPaper Class="pa-4" Elevation="0"
+                                      Style="border: 1px solid var(--mud-palette-divider); border-radius: 8px;">
+                                <MudText Typo="Typo.subtitle2" Class="mb-3">
+                                    <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" Class="mr-1" />
+                                    Challenge Details
+                                </MudText>
+                                <MudGrid>
+                                    <MudItem xs="12" sm="6">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Language</MudText>
+                                        <MudText Typo="Typo.body2" Style="font-family: 'JetBrains Mono', monospace;">
+                                            @_lesson.Challenge.Language
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" sm="6">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Difficulty</MudText>
+                                        <DifficultyBadge Difficulty="_lesson.Challenge.Difficulty" />
+                                    </MudItem>
+                                    <MudItem xs="12" sm="4">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">XP Reward</MudText>
+                                        <MudText Typo="Typo.body2">@_lesson.Challenge.XpReward XP</MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" sm="4">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Time Limit</MudText>
+                                        <MudText Typo="Typo.body2">@_lesson.Challenge.TimeLimitMs ms</MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" sm="4">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Test Cases</MudText>
+                                        <MudText Typo="Typo.body2">@_lesson.Challenge.TestCases.Count</MudText>
+                                    </MudItem>
+                                </MudGrid>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-3">
+                                    Challenge-specific fields (starter code, test cases) are managed separately.
+                                </MudText>
+                            </MudPaper>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Info">
+                                No challenge data attached. This lesson is marked as a coding challenge but has no challenge content yet.
+                            </MudAlert>
+                        }
+                    }
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-3">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   OnClick="Save"
+                                   Disabled="_saving"
+                                   StartIcon="@Icons.Material.Filled.Save">
+                            @(_saving ? "Saving..." : "Save Lesson")
+                        </MudButton>
+                        <MudButton Variant="Variant.Outlined"
+                                   Href="@($"/courses/{CourseId}")">
+                            Cancel
+                        </MudButton>
+                    </div>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Sidebar info -->
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="2" Style="border-radius: 12px;">
+                <MudText Typo="Typo.subtitle2" Class="mb-3">Tips</MudText>
+                @if (_form.Type == LessonType.Theory)
+                {
+                    <MudList T="string" Dense="true">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.FormatBold">Use **bold** for emphasis</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Code">`backticks` for inline code</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.FormatListBulleted">- or * for bullet lists</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Title">## for headings</MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.DeveloperMode">```lang for code blocks</MudListItem>
+                    </MudList>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Update the lesson title, type, and order. Challenge-specific settings like starter code and test cases are attached when the lesson is created.
+                    </MudText>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter] public string CourseId { get; set; } = string.Empty;
+    [Parameter] public string ModuleId { get; set; } = string.Empty;
+    [Parameter] public string LessonId { get; set; } = string.Empty;
+
+    private LessonDetailResponse? _lesson;
+    private bool _loading = true;
+    private bool _saving;
+
+    private readonly LessonEditModel _form = new();
+
+    private List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Home", href: "/"),
+        new("Courses", href: "/courses"),
+        new("Course", href: null, disabled: true),
+        new("Edit Lesson", href: null, disabled: true)
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _lesson = await CoursesApi.GetLessonByIdAsync(CourseId, ModuleId, LessonId);
+        if (_lesson is not null)
+        {
+            _form.Title = _lesson.Title;
+            _form.Type = _lesson.Type;
+            _form.Order = _lesson.Order;
+            _form.Content = _lesson.Content ?? string.Empty;
+
+            _breadcrumbs[2] = new("Course", href: $"/courses/{CourseId}");
+            _breadcrumbs[3] = new(_lesson.Title, href: null, disabled: true);
+        }
+        _loading = false;
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(_form.Title)) return;
+        _saving = true;
+        try
+        {
+            await CoursesApi.UpdateLessonAsync(CourseId, ModuleId, LessonId,
+                new UpdateLessonRequest(
+                    _form.Title,
+                    _form.Type,
+                    _form.Order,
+                    _form.Type == LessonType.Theory ? _form.Content : null,
+                    null));
+
+            Snackbar.Add("Lesson saved!", Severity.Success);
+            Navigation.NavigateTo($"/courses/{CourseId}");
+        }
+        catch
+        {
+            Snackbar.Add("Failed to save lesson", Severity.Error);
+        }
+        finally { _saving = false; }
+    }
+
+    private static string RenderMarkdown(string markdown)
+    {
+        var pipeline = new Markdig.MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .Build();
+        return Markdig.Markdown.ToHtml(markdown, pipeline);
+    }
+
+    private class LessonEditModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public LessonType Type { get; set; } = LessonType.Theory;
+        public int Order { get; set; }
+        public string Content { get; set; } = string.Empty;
+    }
+}

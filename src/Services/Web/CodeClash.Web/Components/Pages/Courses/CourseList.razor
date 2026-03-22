@@ -1,0 +1,214 @@
+@page "/courses"
+
+@inject ICoursesApiClient CoursesApi
+
+<PageTitle>Courses – CodeClash</PageTitle>
+
+<div class="d-flex align-center justify-space-between mb-4">
+    <div>
+        <MudText Typo="Typo.h4" Style="font-weight: 700;">Courses</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">Explore all available learning paths</MudText>
+    </div>
+    <MudButton Href="/courses/new"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Add">
+        Create Course
+    </MudButton>
+</div>
+
+<MudGrid>
+    <!-- Filters Sidebar -->
+    <MudItem xs="12" md="3">
+        <MudPaper Class="pa-4" Elevation="2" Style="border-radius: 12px; position: sticky; top: 80px;">
+            <MudText Typo="Typo.subtitle1" Style="font-weight: 600;" Class="mb-3">Filters</MudText>
+
+            <MudTextField @bind-Value="_searchText"
+                          Placeholder="Search courses..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="mb-4"
+                          Immediate="true"
+                          DebounceInterval="300"
+                          OnDebounceIntervalElapsed="ApplyFilters" />
+
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">DIFFICULTY</MudText>
+            <div class="d-flex flex-column gap-1 mb-4">
+                @foreach (var diff in Enum.GetValues<CourseDifficulty>().Where(d => d != CourseDifficulty.Unspecified))
+                {
+                    <MudCheckBox T="bool"
+                                 Value="@_selectedDifficulties.Contains(diff)"
+                                 ValueChanged="@(v => ToggleDifficulty(diff, v))"
+                                 Color="Color.Primary"
+                                 Label="@diff.ToString()"
+                                 Dense="true" />
+                }
+            </div>
+
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">TECHNOLOGY</MudText>
+            <div class="d-flex flex-wrap gap-1">
+                @foreach (var tech in _popularTechs)
+                {
+                    var selected = _selectedTechs.Contains(tech);
+                    <MudChip T="string"
+                             Size="Size.Small"
+                             Color="@(selected ? Color.Primary : Color.Default)"
+                             Variant="@(selected ? Variant.Filled : Variant.Outlined)"
+                             OnClick="@(() => ToggleTech(tech))">
+                        @GetTechName(tech)
+                    </MudChip>
+                }
+            </div>
+
+            @if (_selectedDifficulties.Count > 0 || _selectedTechs.Count > 0 || !string.IsNullOrEmpty(_searchText))
+            {
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.Clear"
+                           OnClick="ClearFilters"
+                           FullWidth="true"
+                           Class="mt-4">
+                    Clear Filters
+                </MudButton>
+            }
+        </MudPaper>
+    </MudItem>
+
+    <!-- Course Grid -->
+    <MudItem xs="12" md="9">
+        @if (_loading)
+        {
+            <MudGrid>
+                @for (var i = 0; i < _pageSize; i++)
+                {
+                    <MudItem xs="12" sm="6" lg="4">
+                        <MudCard Elevation="3">
+                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="160px" />
+                            <MudCardContent>
+                                <MudSkeleton Width="60%" Class="mb-2" />
+                                <MudSkeleton Width="100%" />
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+        else if (_filteredCourses.Count == 0)
+        {
+            <MudPaper Class="pa-8 text-center" Elevation="1" Style="border-radius: 12px;">
+                <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Secondary" Style="font-size: 4rem;" />
+                <MudText Typo="Typo.h6" Class="mt-3">No courses found</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Try adjusting your filters or search query</MudText>
+            </MudPaper>
+        }
+        else
+        {
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                Showing @_filteredCourses.Count of @_totalCount courses
+            </MudText>
+            <MudGrid>
+                @foreach (var course in _filteredCourses)
+                {
+                    <MudItem xs="12" sm="6" lg="4">
+                        <CourseCard Course="course" />
+                    </MudItem>
+                }
+            </MudGrid>
+
+            @if (_totalPages > 1)
+            {
+                <div class="d-flex justify-center mt-6">
+                    <MudPagination Count="@_totalPages"
+                                   Selected="@_currentPage"
+                                   SelectedChanged="OnPageChanged"
+                                   Color="Color.Primary"
+                                   Variant="Variant.Filled"
+                                   BoundaryCount="1"
+                                   MiddleCount="3" />
+                </div>
+            }
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<CourseListItem> _allCourses = [];
+    private List<CourseListItem> _filteredCourses = [];
+    private bool _loading = true;
+    private int _currentPage = 1;
+    private int _totalCount;
+    private int _totalPages;
+    private const int _pageSize = 9;
+
+    private string _searchText = string.Empty;
+    private readonly HashSet<CourseDifficulty> _selectedDifficulties = [];
+    private readonly HashSet<CodingTechnology> _selectedTechs = [];
+
+    private static readonly CodingTechnology[] _popularTechs =
+    [
+        CodingTechnology.CSharp, CodingTechnology.Python, CodingTechnology.JavaScript,
+        CodingTechnology.TypeScript, CodingTechnology.Java, CodingTechnology.Rust,
+        CodingTechnology.Golang, CodingTechnology.CPlusPlus
+    ];
+
+    protected override async Task OnInitializedAsync() => await LoadCoursesAsync();
+
+    private async Task LoadCoursesAsync()
+    {
+        _loading = true;
+        var result = await CoursesApi.GetCoursesAsync(_currentPage, _pageSize);
+        _allCourses = result.Items;
+        _totalCount = result.TotalCount;
+        _totalPages = result.TotalPages;
+        ApplyFilters();
+        _loading = false;
+    }
+
+    private void ApplyFilters()
+    {
+        _filteredCourses = _allCourses
+            .Where(c =>
+                (string.IsNullOrEmpty(_searchText) || c.Title.Contains(_searchText, StringComparison.OrdinalIgnoreCase) || c.Description.Contains(_searchText, StringComparison.OrdinalIgnoreCase)) &&
+                (_selectedDifficulties.Count == 0 || _selectedDifficulties.Contains(c.Difficulty)) &&
+                (_selectedTechs.Count == 0 || c.CodingTechnologies.Any(t => _selectedTechs.Contains(t))))
+            .ToList();
+    }
+
+    private void ToggleDifficulty(CourseDifficulty diff, bool add)
+    {
+        if (add) _selectedDifficulties.Add(diff);
+        else _selectedDifficulties.Remove(diff);
+        ApplyFilters();
+    }
+
+    private void ToggleTech(CodingTechnology tech)
+    {
+        if (!_selectedTechs.Remove(tech)) _selectedTechs.Add(tech);
+        ApplyFilters();
+    }
+
+    private void ClearFilters()
+    {
+        _searchText = string.Empty;
+        _selectedDifficulties.Clear();
+        _selectedTechs.Clear();
+        ApplyFilters();
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        _currentPage = page;
+        await LoadCoursesAsync();
+    }
+
+    private static string GetTechName(CodingTechnology tech) => tech switch
+    {
+        CodingTechnology.CSharp => "C#",
+        CodingTechnology.CPlusPlus => "C++",
+        CodingTechnology.JavaScript => "JS",
+        CodingTechnology.TypeScript => "TS",
+        _ => tech.ToString()
+    };
+}

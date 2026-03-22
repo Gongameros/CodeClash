@@ -1,0 +1,203 @@
+@page "/my-courses"
+
+@inject ICoursesApiClient CoursesApi
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>My Courses – CodeClash</PageTitle>
+
+<div class="d-flex align-center justify-space-between mb-6">
+    <div>
+        <MudText Typo="Typo.h4" Style="font-weight: 700;">My Courses</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">Manage the courses you've created</MudText>
+    </div>
+    <MudButton Href="/courses/new"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Add">
+        Create Course
+    </MudButton>
+</div>
+
+@if (_loading)
+{
+    <MudStack Spacing="3">
+        @for (var i = 0; i < 3; i++)
+        {
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="80px" Style="border-radius: 12px;" />
+        }
+    </MudStack>
+}
+else if (_courses.Count == 0)
+{
+    <MudPaper Class="pa-12 text-center" Elevation="1" Style="border-radius: 16px;">
+        <MudIcon Icon="@Icons.Material.Filled.School" Style="font-size: 4rem; opacity: 0.3;" />
+        <MudText Typo="Typo.h6" Class="mt-4">No courses yet</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">
+            Share your knowledge by creating your first course.
+        </MudText>
+        <MudButton Href="/courses/new" Variant="Variant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add">
+            Create First Course
+        </MudButton>
+    </MudPaper>
+}
+else
+{
+    <!-- Stats row -->
+    <MudGrid Class="mb-6">
+        <MudItem xs="6" sm="3">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="border-radius: 12px;">
+                <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight:700;">@_courses.Count</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Total Courses</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="border-radius: 12px;">
+                <MudText Typo="Typo.h4" Color="Color.Success" Style="font-weight:700;">@_courses.Count(c => c.IsPublished)</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Published</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="border-radius: 12px;">
+                <MudText Typo="Typo.h4" Color="Color.Warning" Style="font-weight:700;">@_courses.Count(c => !c.IsPublished)</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Drafts</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="border-radius: 12px;">
+                <MudText Typo="Typo.h4" Style="font-weight:700; color: #FFD700;">@_courses.Sum(c => c.EnrolledCount)</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Total Enrolled</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Courses list -->
+    <MudStack Spacing="3">
+        @foreach (var course in _courses.OrderByDescending(c => c.CreatedAt))
+        {
+            <MudPaper Class="pa-4" Elevation="2" Style="border-radius: 12px;">
+                <MudGrid Class="align-center">
+                    <MudItem xs="12" sm="7">
+                        <div class="d-flex align-center gap-3">
+                            <div class="d-flex flex-column">
+                                <div class="d-flex align-center gap-2 mb-1">
+                                    <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">@course.Title</MudText>
+                                    @if (course.IsPublished)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Published</MudChip>
+                                    }
+                                    else
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">Draft</MudChip>
+                                    }
+                                </div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    @Truncate(course.Description, 80)
+                                </MudText>
+                                <div class="d-flex align-center gap-3 mt-2">
+                                    <DifficultyBadge Difficulty="course.Difficulty" />
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @course.EnrolledCount enrolled · @course.TotalXp XP
+                                    </MudText>
+                                </div>
+                            </div>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="12" sm="5">
+                        <div class="d-flex justify-end gap-2 flex-wrap">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Default"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.Visibility"
+                                       Href="@($"/courses/{course.Id}")">
+                                View
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.Edit"
+                                       Href="@($"/courses/{course.Id}/edit")">
+                                Edit
+                            </MudButton>
+                            @if (course.IsPublished)
+                            {
+                                <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Warning"
+                                           Size="Size.Small"
+                                           StartIcon="@Icons.Material.Filled.Unpublished"
+                                           OnClick="@(() => TogglePublish(course))">
+                                    Unpublish
+                                </MudButton>
+                            }
+                            else
+                            {
+                                <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Success"
+                                           Size="Size.Small"
+                                           StartIcon="@Icons.Material.Filled.Publish"
+                                           OnClick="@(() => TogglePublish(course))">
+                                    Publish
+                                </MudButton>
+                            }
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           OnClick="@(() => DeleteCourse(course))" />
+                        </div>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        }
+    </MudStack>
+}
+
+@code {
+    private List<CourseListItem> _courses = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync() => await LoadCoursesAsync();
+
+    private async Task LoadCoursesAsync()
+    {
+        _loading = true;
+        var result = await CoursesApi.GetCoursesAsync(page: 1, pageSize: 100);
+        _courses = result.Items;
+        _loading = false;
+    }
+
+    private async Task TogglePublish(CourseListItem course)
+    {
+        try
+        {
+            await CoursesApi.UpdateCourseAsync(course.Id,
+                new UpdateCourseRequest(null, null, null, null, null, null, !course.IsPublished));
+            var msg = course.IsPublished ? "Course unpublished" : "Course published";
+            Snackbar.Add(msg, Severity.Success);
+            await LoadCoursesAsync();
+        }
+        catch { Snackbar.Add("Failed to update course", Severity.Error); }
+    }
+
+    private async Task DeleteCourse(CourseListItem course)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Delete Course",
+            $"Delete '{course.Title}'? This will also remove all modules and lessons.",
+            yesText: "Delete", cancelText: "Cancel");
+        if (confirmed != true) return;
+
+        try
+        {
+            await CoursesApi.DeleteCourseAsync(course.Id);
+            Snackbar.Add("Course deleted", Severity.Success);
+            await LoadCoursesAsync();
+        }
+        catch { Snackbar.Add("Failed to delete course", Severity.Error); }
+    }
+
+    private static string Truncate(string text, int max) =>
+        text.Length <= max ? text : text[..max] + "…";
+}

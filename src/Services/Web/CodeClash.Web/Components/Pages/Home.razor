@@ -1,0 +1,122 @@
+@page "/"
+
+@inject ICoursesApiClient CoursesApi
+
+<PageTitle>CodeClash – Learn to Code by Building</PageTitle>
+
+<!-- Hero Section -->
+<MudPaper Class="hero-section pa-8 mb-8" Elevation="0" Style="background: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%); border-radius: 16px; min-height: 280px;">
+    <MudGrid Class="align-center" Justify="Justify.SpaceBetween">
+        <MudItem xs="12" md="7">
+            <MudText Typo="Typo.h3" Style="color: white; font-weight: 700; font-family: 'JetBrains Mono', monospace;">
+                &lt;CodeClash /&gt;
+            </MudText>
+            <MudText Typo="Typo.h5" Style="color: #A0A8D0;" Class="mt-2 mb-4">
+                Master coding through interactive challenges, real projects, and a structured learning path.
+            </MudText>
+            <div class="d-flex gap-3 flex-wrap">
+                <MudButton Href="/courses"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large"
+                           StartIcon="@Icons.Material.Filled.School"
+                           Style="border-radius: 8px;">
+                    Browse Courses
+                </MudButton>
+            </div>
+        </MudItem>
+        <MudItem xs="12" md="5" Class="d-none d-md-flex justify-center">
+            <MudText Style="font-size: 6rem; opacity: 0.15; font-family: 'JetBrains Mono', monospace; color: #6C63FF; line-height: 1;">
+                { }
+            </MudText>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<!-- Stats Bar -->
+@if (_stats is not null)
+{
+    <MudGrid Class="mb-8" Justify="Justify.Center">
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="border-radius: 12px;">
+                <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 700;">@_stats.TotalCourses</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Courses Available</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="border-radius: 12px;">
+                <MudText Typo="Typo.h4" Color="Color.Secondary" Style="font-weight: 700;">@_stats.TotalEnrolled</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Learners Enrolled</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="border-radius: 12px;">
+                <MudText Typo="Typo.h4" Style="color: #FFD700; font-weight: 700;">@_stats.TotalXp XP</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Total XP to Earn</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+<!-- Featured Courses -->
+<div class="d-flex align-center justify-space-between mb-4">
+    <MudText Typo="Typo.h5" Style="font-weight: 600;">Featured Courses</MudText>
+    <MudButton Href="/courses" Variant="Variant.Text" Color="Color.Primary" EndIcon="@Icons.Material.Filled.ArrowForward">
+        View All
+    </MudButton>
+</div>
+
+@if (_loading)
+{
+    <MudGrid>
+        @for (var i = 0; i < 6; i++)
+        {
+            <MudItem xs="12" sm="6" lg="4">
+                <MudCard Elevation="3" Style="border-radius: 12px;">
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="160px" />
+                    <MudCardContent>
+                        <MudSkeleton Width="60%" Class="mb-2" />
+                        <MudSkeleton Width="100%" />
+                        <MudSkeleton Width="80%" />
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+else if (_courses.Count > 0)
+{
+    <MudGrid>
+        @foreach (var course in _courses)
+        {
+            <MudItem xs="12" sm="6" lg="4">
+                <CourseCard Course="course" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+else
+{
+    <MudAlert Severity="Severity.Info" Class="mt-4">
+        No courses available yet. Be the first to <MudLink Href="/courses/new" Color="Color.Primary">create one</MudLink>!
+    </MudAlert>
+}
+
+@code {
+    private List<CourseListItem> _courses = [];
+    private bool _loading = true;
+    private StatsModel? _stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await CoursesApi.GetCoursesAsync(page: 1, pageSize: 6);
+        _courses = result.Items;
+        _stats = new StatsModel(
+            result.Items.Count > 0 ? result.TotalCount : 0,
+            result.Items.Sum(c => c.EnrolledCount),
+            result.Items.Sum(c => c.TotalXp));
+        _loading = false;
+    }
+
+    private record StatsModel(int TotalCourses, int TotalEnrolled, int TotalXp);
+}

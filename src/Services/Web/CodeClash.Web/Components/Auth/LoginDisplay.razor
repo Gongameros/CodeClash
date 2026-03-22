@@ -1,0 +1,28 @@
+@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+    <Authorized>
+        <MudChip T="string"
+                 Icon="@Icons.Material.Filled.Person"
+                 Color="Color.Primary"
+                 Variant="Variant.Outlined"
+                 Class="ml-1">
+            @(context.User.Identity?.Name ?? context.User.FindFirst("preferred_username")?.Value ?? "User")
+        </MudChip>
+        <MudButton Href="/auth/logout"
+                   Color="Color.Inherit"
+                   StartIcon="@Icons.Material.Filled.Logout"
+                   Class="ml-1">
+            Logout
+        </MudButton>
+    </Authorized>
+    <NotAuthorized>
+        <MudButton Href="/auth/login"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Login"
+                   Class="ml-1">
+            Login
+        </MudButton>
+    </NotAuthorized>
+</AuthorizeView>

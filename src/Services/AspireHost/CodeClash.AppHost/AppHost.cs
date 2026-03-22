@@ -51,4 +51,11 @@ builder.AddProject<Projects.CodeClash_Gateway>(Resources.GatewayService)
     .WithReference(coders)
     .WithEnvironment("InternalApiKey", internalApiKey);
 
+builder.AddProject<Projects.CodeClash_Web>(Resources.WebService)
+    .WithHttpHealthCheck("/health")
+    .WaitFor(keycloak)
+    .WaitFor(courses)
+    .WithReference(keycloak)
+    .WithReference(courses);
+
 builder.Build().Run();

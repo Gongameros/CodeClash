@@ -1,0 +1,15 @@
+@page "/Error"
+@using Microsoft.AspNetCore.Diagnostics
+
+<PageTitle>Error – CodeClash</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-16 text-center">
+    <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Size="Size.Large" Color="Color.Error" Style="font-size: 5rem;" />
+    <MudText Typo="Typo.h4" Class="mt-4">Something went wrong</MudText>
+    <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2 mb-6">
+        An unexpected error has occurred. Please try again later.
+    </MudText>
+    <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Home">
+        Go Home
+    </MudButton>
+</MudContainer>

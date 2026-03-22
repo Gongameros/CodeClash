@@ -20,6 +20,7 @@ public static class KeycloakResourceExtension
                 adminPassword: keycloakPassword)
             .WithLifetime(ContainerLifetime.Persistent)
             .WithDataVolume(KeycloakVolumeName)
+            .WithExternalHttpEndpoints()
             .WithOtlpExporter();
     }
 }

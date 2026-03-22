@@ -45,7 +45,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseInternalApiKey();
+// app.UseInternalApiKey();
 app.UseAuthentication();
 app.UseAuthorization();
 

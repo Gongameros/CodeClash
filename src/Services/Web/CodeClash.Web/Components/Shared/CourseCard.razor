@@ -1,0 +1,64 @@
+@inject NavigationManager Navigation
+
+<MudCard Class="course-card h-100" Elevation="3" Style="cursor: pointer;" @onclick="Navigate">
+    <MudCardMedia Image="@(Course.ThumbnailUrl ?? "/images/course-placeholder.svg")"
+                  Height="160"
+                  Title="@Course.Title" />
+    <MudCardContent Class="pb-0">
+        <div class="d-flex align-center gap-2 mb-2">
+            <DifficultyBadge Difficulty="Course.Difficulty" />
+            @if (!Course.IsPublished)
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined">Draft</MudChip>
+            }
+        </div>
+
+        <MudText Typo="Typo.h6" Class="course-title mb-1">@Course.Title</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="course-description">
+            @Truncate(Course.Description, 100)
+        </MudText>
+
+        <div class="d-flex flex-wrap gap-1 mt-2">
+            @foreach (var tech in Course.CodingTechnologies.Take(3))
+            {
+                <TechBadge Technology="tech" />
+            }
+            @if (Course.CodingTechnologies.Count > 3)
+            {
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Default">
+                    +@(Course.CodingTechnologies.Count - 3)
+                </MudChip>
+            }
+        </div>
+    </MudCardContent>
+    <MudCardActions Class="pt-1">
+        <div class="d-flex align-center gap-3 px-2 py-1 w-100">
+            <div class="d-flex align-center gap-1">
+                <MudIcon Icon="@Icons.Material.Filled.Star" Color="Color.Warning" Size="Size.Small" />
+                <MudText Typo="Typo.caption">@Course.Rating.ToString("F1")</MudText>
+            </div>
+            <div class="d-flex align-center gap-1">
+                <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Secondary" Size="Size.Small" />
+                <MudText Typo="Typo.caption">@Course.EnrolledCount</MudText>
+            </div>
+            <div class="d-flex align-center gap-1">
+                <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Color="Color.Primary" Size="Size.Small" />
+                <MudText Typo="Typo.caption">@Course.TotalXp XP</MudText>
+            </div>
+            <MudSpacer />
+            <div class="d-flex align-center gap-1">
+                <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Secondary" Size="Size.Small" />
+                <MudText Typo="Typo.caption">@Course.EnrolledCount enrolled</MudText>
+            </div>
+        </div>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired] public CourseListItem Course { get; set; } = null!;
+
+    private void Navigate() => Navigation.NavigateTo($"/courses/{Course.Id}");
+
+    private static string Truncate(string text, int maxLength) =>
+        text.Length <= maxLength ? text : text[..maxLength] + "…";
+}

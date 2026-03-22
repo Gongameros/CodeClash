@@ -1,0 +1,237 @@
+@page "/courses/{courseId}/edit"
+
+@inject ICoursesApiClient CoursesApi
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Edit Course – CodeClash</PageTitle>
+
+@if (_loading)
+{
+    <MudSkeleton Width="200px" Height="40px" Class="mb-4" />
+    <MudSkeleton Width="100%" Height="400px" />
+}
+else if (_course is null)
+{
+    <MudAlert Severity="Severity.Error">Course not found.</MudAlert>
+}
+else
+{
+    <MudBreadcrumbs Items="_breadcrumbs" Class="mb-4 px-0" />
+    <MudText Typo="Typo.h4" Style="font-weight: 700;" Class="mb-6">Edit Course</MudText>
+
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudPaper Class="pa-6" Elevation="2" Style="border-radius: 16px;">
+                <MudStack Spacing="4">
+                    <MudTextField @bind-Value="_form.Title"
+                                  Label="Course Title"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  Counter="100"
+                                  MaxLength="100" />
+
+                    <MudTextField @bind-Value="_form.Description"
+                                  Label="Description"
+                                  Variant="Variant.Outlined"
+                                  Lines="4"
+                                  Required="true"
+                                  Counter="500"
+                                  MaxLength="500" />
+
+                    <MudSelect T="CourseDifficulty" @bind-Value="_form.Difficulty"
+                               Label="Difficulty"
+                               Variant="Variant.Outlined">
+                        <MudSelectItem Value="CourseDifficulty.Beginner">Beginner</MudSelectItem>
+                        <MudSelectItem Value="CourseDifficulty.Intermediate">Intermediate</MudSelectItem>
+                        <MudSelectItem Value="CourseDifficulty.Advanced">Advanced</MudSelectItem>
+                    </MudSelect>
+
+                    <MudTextField @bind-Value="_form.ThumbnailUrl"
+                                  Label="Thumbnail URL (optional)"
+                                  Variant="Variant.Outlined"
+                                  Placeholder="https://..." />
+
+                    <div>
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">Technologies</MudText>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var tech in Enum.GetValues<CodingTechnology>())
+                            {
+                                var selected = _form.CodingTechnologies.Contains(tech);
+                                <MudChip T="string"
+                                         Size="Size.Small"
+                                         Color="@(selected ? Color.Primary : Color.Default)"
+                                         Variant="@(selected ? Variant.Filled : Variant.Outlined)"
+                                         OnClick="@(() => ToggleTech(tech))"
+                                         Style="font-family: 'JetBrains Mono', monospace;">
+                                    @GetTechName(tech)
+                                </MudChip>
+                            }
+                        </div>
+                    </div>
+
+                    <div>
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">Tags</MudText>
+                        <div class="d-flex gap-2 mb-2">
+                            <MudTextField @bind-Value="_tagInput"
+                                          Label="Add tag"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          @onkeydown="OnTagKeyDown"
+                                          Immediate="true" />
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                       OnClick="AddTag" Size="Size.Small"
+                                       Disabled="@string.IsNullOrWhiteSpace(_tagInput)">Add</MudButton>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach (var tag in _form.Tags)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary"
+                                         OnClose="@(() => _form.Tags.Remove(tag))">#@tag</MudChip>
+                            }
+                        </div>
+                    </div>
+
+                    <MudSwitch @bind-Value="_form.IsPublished"
+                               Color="Color.Primary"
+                               Label="@(_form.IsPublished ? "Published" : "Draft")" />
+
+                    <div class="d-flex gap-3">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   OnClick="Save"
+                                   Disabled="_saving"
+                                   StartIcon="@Icons.Material.Filled.Save">
+                            @(_saving ? "Saving..." : "Save Changes")
+                        </MudButton>
+                        <MudButton Variant="Variant.Outlined"
+                                   Href="@($"/courses/{CourseId}")">
+                            Cancel
+                        </MudButton>
+                    </div>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="2" Style="border-radius: 12px; position: sticky; top: 80px;">
+                <MudText Typo="Typo.subtitle2" Class="mb-3">Preview</MudText>
+                @if (!string.IsNullOrEmpty(_form.ThumbnailUrl))
+                {
+                    <MudImage Src="@_form.ThumbnailUrl" Alt="Thumbnail" ObjectFit="ObjectFit.Cover"
+                              Height="140" Class="rounded mb-3" Style="width: 100%;" />
+                }
+                <DifficultyBadge Difficulty="_form.Difficulty" />
+                <MudText Typo="Typo.h6" Class="mt-2" Style="font-weight: 600;">@_form.Title</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
+                    @(_form.Description.Length > 100 ? _form.Description[..100] + "…" : _form.Description)
+                </MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter] public string CourseId { get; set; } = string.Empty;
+
+    private CourseDetailResponse? _course;
+    private bool _loading = true;
+    private bool _saving;
+    private string _tagInput = string.Empty;
+
+    private readonly EditFormModel _form = new();
+
+    private List<BreadcrumbItem> _breadcrumbs =
+    [
+        new("Home", href: "/"),
+        new("Courses", href: "/courses"),
+        new("Loading...", href: null, disabled: true),
+        new("Edit", href: null, disabled: true)
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _course = await CoursesApi.GetCourseByIdAsync(CourseId);
+        if (_course is not null)
+        {
+            _form.Title = _course.Title;
+            _form.Description = _course.Description;
+            _form.Difficulty = _course.Difficulty;
+            _form.ThumbnailUrl = _course.ThumbnailUrl ?? string.Empty;
+            _form.CodingTechnologies = [.. _course.CodingTechnologies];
+            _form.Tags = [.. _course.Tags];
+            _form.IsPublished = _course.IsPublished;
+
+            _breadcrumbs[2] = new(_course.Title, href: $"/courses/{CourseId}");
+        }
+
+        _loading = false;
+    }
+
+    private void ToggleTech(CodingTechnology tech)
+    {
+        if (!_form.CodingTechnologies.Remove(tech))
+            _form.CodingTechnologies.Add(tech);
+    }
+
+    private void AddTag()
+    {
+        var tag = _tagInput.Trim().ToLower().Replace(" ", "-");
+        if (!string.IsNullOrEmpty(tag) && !_form.Tags.Contains(tag))
+            _form.Tags.Add(tag);
+        _tagInput = string.Empty;
+    }
+
+    private void OnTagKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key is "Enter" or ",") AddTag();
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(_form.Title)) return;
+        _saving = true;
+        try
+        {
+            await CoursesApi.UpdateCourseAsync(CourseId, new UpdateCourseRequest(
+                _form.Title,
+                _form.Description,
+                _form.CodingTechnologies,
+                _form.Difficulty,
+                _form.Tags,
+                string.IsNullOrEmpty(_form.ThumbnailUrl) ? null : _form.ThumbnailUrl,
+                _form.IsPublished));
+
+            Snackbar.Add("Course updated successfully!", Severity.Success);
+            Navigation.NavigateTo($"/courses/{CourseId}");
+        }
+        catch
+        {
+            Snackbar.Add("Failed to save changes", Severity.Error);
+        }
+        finally { _saving = false; }
+    }
+
+    private static string GetTechName(CodingTechnology tech) => tech switch
+    {
+        CodingTechnology.CSharp => "C#",
+        CodingTechnology.CPlusPlus => "C++",
+        CodingTechnology.FSharp => "F#",
+        CodingTechnology.JavaScript => "JavaScript",
+        CodingTechnology.TypeScript => "TypeScript",
+        CodingTechnology.VisualBasic => "Visual Basic",
+        CodingTechnology.ObjectiveC => "Objective-C",
+        _ => tech.ToString()
+    };
+
+    private class EditFormModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public CourseDifficulty Difficulty { get; set; } = CourseDifficulty.Beginner;
+        public string ThumbnailUrl { get; set; } = string.Empty;
+        public List<CodingTechnology> CodingTechnologies { get; set; } = [];
+        public List<string> Tags { get; set; } = [];
+        public bool IsPublished { get; set; }
+    }
+}
