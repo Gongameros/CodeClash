@@ -1,5 +1,4 @@
 ﻿using Aspire.Hosting.Azure;
-using Azure.Provisioning.Storage;
 using CodeClash.Shared.Constants;
 
 namespace CodeClash.AppHost.Extensions;
@@ -17,16 +16,7 @@ public static class AzureStorageResourceExtension
     public static IResourceBuilder<AzureStorageResource> AddAzureStorageResource(
         this IDistributedApplicationBuilder builder)
     {
-        var storage = builder.AddAzureStorage(Resources.Storage)
-            .ConfigureInfrastructure(infra =>
-            {
-                var storageAccount = infra
-                    .GetProvisionableResources()
-                    .OfType<StorageAccount>()
-                    .Single();
-
-                storageAccount.AllowCrossTenantReplication = false;
-            });
+        var storage = builder.AddAzureStorage(Resources.Storage);
 
         if (builder.ExecutionContext.IsRunMode)
         {

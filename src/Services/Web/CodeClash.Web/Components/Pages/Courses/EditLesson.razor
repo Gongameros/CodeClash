@@ -1,4 +1,5 @@
 @page "/courses/{courseId}/modules/{moduleId}/lessons/{lessonId}/edit"
+@attribute [Authorize]
 
 @inject ICoursesApiClient CoursesApi
 @inject NavigationManager Navigation
@@ -202,6 +203,7 @@ else
     [Parameter] public string CourseId { get; set; } = string.Empty;
     [Parameter] public string ModuleId { get; set; } = string.Empty;
     [Parameter] public string LessonId { get; set; } = string.Empty;
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
     private LessonDetailResponse? _lesson;
     private bool _loading = true;
@@ -219,6 +221,18 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        var course = await CoursesApi.GetCourseByIdAsync(CourseId);
+        if (course is not null)
+        {
+            var authState = await AuthState;
+            var userId = authState.User.FindFirst("sub")?.Value;
+            if (userId is null || userId != course.AuthorId)
+            {
+                Navigation.NavigateTo($"/courses/{CourseId}", replace: true);
+                return;
+            }
+        }
+
         _lesson = await CoursesApi.GetLessonByIdAsync(CourseId, ModuleId, LessonId);
         if (_lesson is not null)
         {

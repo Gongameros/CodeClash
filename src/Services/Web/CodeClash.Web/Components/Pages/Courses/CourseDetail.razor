@@ -67,26 +67,29 @@ else
                     }
                 </div>
             </MudItem>
-            <MudItem xs="12" md="4">
-                <MudPaper Class="pa-4" Elevation="4" Style="border-radius: 12px; background: rgba(255,255,255,0.05);">
-                    <MudText Typo="Typo.subtitle2" Style="color: white;" Class="mb-3">Course Actions</MudText>
-                    <MudButton Href="@($"/courses/{_course.Id}/edit")"
-                               Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.Edit"
-                               FullWidth="true"
-                               Class="mb-2">
-                        Edit Course
-                    </MudButton>
-                    <MudButton OnClick="DeleteCourse"
-                               Variant="Variant.Outlined"
-                               Color="Color.Error"
-                               StartIcon="@Icons.Material.Filled.Delete"
-                               FullWidth="true">
-                        Delete Course
-                    </MudButton>
-                </MudPaper>
-            </MudItem>
+            @if (_isOwner)
+            {
+                <MudItem xs="12" md="4">
+                    <MudPaper Class="pa-4" Elevation="4" Style="border-radius: 12px; background: rgba(255,255,255,0.05);">
+                        <MudText Typo="Typo.subtitle2" Style="color: white;" Class="mb-3">Course Actions</MudText>
+                        <MudButton Href="@($"/courses/{_course.Id}/edit")"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   FullWidth="true"
+                                   Class="mb-2">
+                            Edit Course
+                        </MudButton>
+                        <MudButton OnClick="DeleteCourse"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Error"
+                                   StartIcon="@Icons.Material.Filled.Delete"
+                                   FullWidth="true">
+                            Delete Course
+                        </MudButton>
+                    </MudPaper>
+                </MudItem>
+            }
         </MudGrid>
     </MudPaper>
 
@@ -98,12 +101,15 @@ else
                 @_course.Modules.Count modules
             </MudChip>
         </MudText>
-        <MudButton Variant="Variant.Outlined"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="ShowAddModuleDialog">
-            Add Module
-        </MudButton>
+        @if (_isOwner)
+        {
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="ShowAddModuleDialog">
+                Add Module
+            </MudButton>
+        }
     </div>
 
     @if (_course.Modules.Count == 0)
@@ -111,8 +117,11 @@ else
         <MudPaper Class="pa-6 text-center" Elevation="1" Style="border-radius: 12px;">
             <MudIcon Icon="@Icons.Material.Filled.ViewModule" Size="Size.Large" Color="Color.Secondary" Style="font-size: 3rem;" />
             <MudText Typo="Typo.h6" Class="mt-2">No modules yet</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">Start building your course by adding modules</MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ShowAddModuleDialog">Add First Module</MudButton>
+            @if (_isOwner)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">Start building your course by adding modules</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ShowAddModuleDialog">Add First Module</MudButton>
+            }
         </MudPaper>
     }
     else
@@ -137,18 +146,21 @@ else
                             <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
                                 @module.XpReward XP
                             </MudChip>
-                            <span @onclick:stopPropagation="true">
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                               Size="Size.Small"
-                                               Color="Color.Primary"
-                                               OnClick="@(() => ShowEditModuleDialog(module))" />
-                            </span>
-                            <span @onclick:stopPropagation="true">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                               Size="Size.Small"
-                                               Color="Color.Error"
-                                               OnClick="@(() => DeleteModule(module))" />
-                            </span>
+                            @if (_isOwner)
+                            {
+                                <span @onclick:stopPropagation="true">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                   Size="Size.Small"
+                                                   Color="Color.Primary"
+                                                   OnClick="@(() => ShowEditModuleDialog(module))" />
+                                </span>
+                                <span @onclick:stopPropagation="true">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                   Size="Size.Small"
+                                                   Color="Color.Error"
+                                                   OnClick="@(() => DeleteModule(module))" />
+                                </span>
+                            }
                         </div>
                     </TitleContent>
                     <ChildContent>
@@ -159,27 +171,33 @@ else
                                     <div class="d-flex align-center gap-3 w-100 py-1">
                                         <LessonTypeIcon Type="lesson.Type" />
                                         <MudText Typo="Typo.body2" Class="flex-grow-1">@lesson.Title</MudText>
-                                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                                       Size="Size.Small"
-                                                       Color="Color.Primary"
-                                                       OnClick="@(() => Navigation.NavigateTo($"/courses/{_course.Id}/modules/{module.ModuleId}/lessons/{lesson.LessonId}/edit"))" />
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                                       Size="Size.Small"
-                                                       Color="Color.Error"
-                                                       OnClick="@(() => DeleteLesson(module.ModuleId, lesson))" />
+                                        @if (_isOwner)
+                                        {
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                           Size="Size.Small"
+                                                           Color="Color.Primary"
+                                                           OnClick="@(() => Navigation.NavigateTo($"/courses/{_course.Id}/modules/{module.ModuleId}/lessons/{lesson.LessonId}/edit"))" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                           Size="Size.Small"
+                                                           Color="Color.Error"
+                                                           OnClick="@(() => DeleteLesson(module.ModuleId, lesson))" />
+                                        }
                                     </div>
                                 </MudListItem>
                             }
                         </MudList>
-                        <div class="pa-2">
-                            <MudButton Variant="Variant.Text"
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       Size="Size.Small"
-                                       OnClick="@(() => ShowAddLessonDialog(module.ModuleId))">
-                                Add Lesson
-                            </MudButton>
-                        </div>
+                        @if (_isOwner)
+                        {
+                            <div class="pa-2">
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           Size="Size.Small"
+                                           OnClick="@(() => ShowAddLessonDialog(module.ModuleId))">
+                                    Add Lesson
+                                </MudButton>
+                            </div>
+                        }
                     </ChildContent>
                 </MudExpansionPanel>
             }
@@ -245,8 +263,10 @@ else
 
 @code {
     [Parameter] public string CourseId { get; set; } = string.Empty;
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
     private CourseDetailResponse? _course;
+    private bool _isOwner;
     private bool _loading = true;
     private bool _showAddModule;
     private bool _showAddLesson;
@@ -276,6 +296,9 @@ else
         if (_course is not null)
         {
             _breadcrumbs[2] = new(_course.Title, href: null, disabled: true);
+            var authState = await AuthState;
+            var userId = authState.User.FindFirst("sub")?.Value;
+            _isOwner = userId is not null && userId == _course.AuthorId;
         }
 
         _loading = false;

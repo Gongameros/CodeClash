@@ -1,11 +1,11 @@
 using CodeClash.Courses.Domains.Courses;
+using CodeClash.Courses.Shared.Constants;
 using CodeClash.MongoDB.Extensions;
 
 namespace CodeClash.Courses.Extensions;
 
 public static class DependencyInjection
 {
-    private const string DatabaseName = "courses-db";
     extension(IHostApplicationBuilder builder)
     {
         public IHostApplicationBuilder AddDependencyInjection()
@@ -21,10 +21,10 @@ public static class DependencyInjection
 
         public IHostApplicationBuilder AddMongoDb()
         {
-            builder.AddMongoDb(DatabaseName);
+            builder.AddMongoDb(MongoDbConstants.DatabaseName);
             var services = builder.Services;
 
-            services.AddMongoCollection<Course>("courses");
+            services.AddMongoCollection<Course>(MongoDbConstants.CoursesCollectionName);
             return builder;
         }
      }
