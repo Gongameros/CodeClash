@@ -12,7 +12,7 @@ public sealed class MongoDbFixture : IAsyncLifetime
     public IMongoClient Client { get; private set; } = null!;
     public IMongoDatabase Database { get; private set; } = null!;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await _container.StartAsync();
         MongoDbConventions.RegisterConventions();
@@ -28,5 +28,5 @@ public sealed class MongoDbFixture : IAsyncLifetime
             await Database.DropCollectionAsync(name);
     }
 
-    public async Task DisposeAsync() => await _container.StopAsync();
+    public async ValueTask DisposeAsync() => await _container.StopAsync();
 }

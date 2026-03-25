@@ -32,4 +32,7 @@
   <Folder Name="/src/Web/">
     <Project Path="src/Services/Web/CodeClash.Web/CodeClash.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CodeClash.E2E.Tests/CodeClash.E2E.Tests.csproj" />
+  </Folder>
 </Solution>

@@ -24,4 +24,10 @@
       <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Utilities\CodeClash.Utilities.csproj" IsAspireProjectResource="false" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="KeycloakRealms\**\*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

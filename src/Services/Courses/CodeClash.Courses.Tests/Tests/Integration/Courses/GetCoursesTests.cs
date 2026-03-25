@@ -8,13 +8,13 @@ namespace CodeClash.Courses.Tests.Tests.Integration.Courses;
 [Collection(IntegrationCollection.Name)]
 public sealed class GetCoursesTests(IntegrationFixture fixture) : IAsyncLifetime
 {
-    public Task InitializeAsync() => fixture.ResetAsync();
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => new(fixture.ResetAsync());
+    public ValueTask DisposeAsync() => default;
 
     [Fact]
     public async Task Handle_EmptyCollection_ReturnsEmptyList()
     {
-        var result = await fixture.Mediator.Send(new GetCoursesQuery());
+        var result = await fixture.Mediator.Send(new GetCoursesQuery(), Ct.Token);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeEmpty();
@@ -23,11 +23,11 @@ public sealed class GetCoursesTests(IntegrationFixture fixture) : IAsyncLifetime
     [Fact]
     public async Task Handle_WithCourses_ReturnsAllCourses()
     {
-        await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Course A"));
-        await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Course B"));
-        await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Course C"));
+        await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Course A"), Ct.Token);
+        await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Course B"), Ct.Token);
+        await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Course C"), Ct.Token);
 
-        var result = await fixture.Mediator.Send(new GetCoursesQuery());
+        var result = await fixture.Mediator.Send(new GetCoursesQuery(), Ct.Token);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Count.ShouldBe(3);
@@ -37,9 +37,9 @@ public sealed class GetCoursesTests(IntegrationFixture fixture) : IAsyncLifetime
     public async Task Handle_WithPagination_ReturnsCorrectPage()
     {
         for (var i = 1; i <= 5; i++)
-            await fixture.Mediator.Send(CourseFactory.CreateCommand(title: $"Course {i}"));
+            await fixture.Mediator.Send(CourseFactory.CreateCommand(title: $"Course {i}"), Ct.Token);
 
-        var result = await fixture.Mediator.Send(new GetCoursesQuery(Page: 2, PageSize: 2));
+        var result = await fixture.Mediator.Send(new GetCoursesQuery(Page: 2, PageSize: 2), Ct.Token);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Count.ShouldBe(2);
@@ -48,7 +48,7 @@ public sealed class GetCoursesTests(IntegrationFixture fixture) : IAsyncLifetime
     [Fact]
     public async Task Handle_InvalidPage_ReturnsValidationFailure()
     {
-        var result = await fixture.Mediator.Send(new GetCoursesQuery(Page: 0));
+        var result = await fixture.Mediator.Send(new GetCoursesQuery(Page: 0), Ct.Token);
 
         result.IsFailure.ShouldBeTrue();
     }
@@ -56,7 +56,7 @@ public sealed class GetCoursesTests(IntegrationFixture fixture) : IAsyncLifetime
     [Fact]
     public async Task Handle_PageSizeTooLarge_ReturnsValidationFailure()
     {
-        var result = await fixture.Mediator.Send(new GetCoursesQuery(PageSize: 101));
+        var result = await fixture.Mediator.Send(new GetCoursesQuery(PageSize: 101), Ct.Token);
 
         result.IsFailure.ShouldBeTrue();
     }
@@ -65,9 +65,9 @@ public sealed class GetCoursesTests(IntegrationFixture fixture) : IAsyncLifetime
     public async Task Handle_ReturnedItems_ContainExpectedFields()
     {
         await fixture.Mediator.Send(
-            CourseFactory.CreateCommand(title: "My Course", difficulty: CourseDifficulty.Advanced));
+            CourseFactory.CreateCommand(title: "My Course", difficulty: CourseDifficulty.Advanced), Ct.Token);
 
-        var result = await fixture.Mediator.Send(new GetCoursesQuery());
+        var result = await fixture.Mediator.Send(new GetCoursesQuery(), Ct.Token);
 
         result.IsSuccess.ShouldBeTrue();
         var item = result.Value.Single();

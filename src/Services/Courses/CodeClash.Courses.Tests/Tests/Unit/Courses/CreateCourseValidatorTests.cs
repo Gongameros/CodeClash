@@ -1,4 +1,5 @@
 using CodeClash.Courses.Features.Courses.CreateCourse;
+using CodeClash.Courses.Tests.Infrastructure;
 using Shouldly;
 
 namespace CodeClash.Courses.Tests.Unit.Courses;
@@ -19,7 +20,7 @@ public sealed class CreateCourseValidatorTests
     [Fact]
     public async Task Validate_ValidCommand_PassesValidation()
     {
-        var result = await _validator.ValidateAsync(ValidCommand());
+        var result = await _validator.ValidateAsync(ValidCommand(), Ct.Token);
 
         result.IsValid.ShouldBeTrue();
     }
@@ -29,7 +30,7 @@ public sealed class CreateCourseValidatorTests
     {
         var command = ValidCommand() with { Title = "" };
 
-        var result = await _validator.ValidateAsync(command);
+        var result = await _validator.ValidateAsync(command, Ct.Token);
 
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.PropertyName == nameof(command.Title));
@@ -40,7 +41,7 @@ public sealed class CreateCourseValidatorTests
     {
         var command = ValidCommand() with { Title = new string('X', 201) };
 
-        var result = await _validator.ValidateAsync(command);
+        var result = await _validator.ValidateAsync(command, Ct.Token);
 
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.PropertyName == nameof(command.Title));
@@ -51,7 +52,7 @@ public sealed class CreateCourseValidatorTests
     {
         var command = ValidCommand() with { Description = "" };
 
-        var result = await _validator.ValidateAsync(command);
+        var result = await _validator.ValidateAsync(command, Ct.Token);
 
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.PropertyName == nameof(command.Description));
@@ -62,7 +63,7 @@ public sealed class CreateCourseValidatorTests
     {
         var command = ValidCommand() with { Description = new string('X', 5001) };
 
-        var result = await _validator.ValidateAsync(command);
+        var result = await _validator.ValidateAsync(command, Ct.Token);
 
         result.IsValid.ShouldBeFalse();
     }
@@ -72,7 +73,7 @@ public sealed class CreateCourseValidatorTests
     {
         var command = ValidCommand() with { CodingTechnologies = [] };
 
-        var result = await _validator.ValidateAsync(command);
+        var result = await _validator.ValidateAsync(command, Ct.Token);
 
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(e => e.PropertyName == nameof(command.CodingTechnologies));
@@ -86,7 +87,7 @@ public sealed class CreateCourseValidatorTests
             CodingTechnologies = [CodingTechnology.CSharp, CodingTechnology.TypeScript]
         };
 
-        var result = await _validator.ValidateAsync(command);
+        var result = await _validator.ValidateAsync(command, Ct.Token);
 
         result.IsValid.ShouldBeTrue();
     }

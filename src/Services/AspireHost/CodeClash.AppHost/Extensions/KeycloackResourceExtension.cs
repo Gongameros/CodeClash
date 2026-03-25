@@ -18,6 +18,7 @@ public static class KeycloakResourceExtension
                 port: KeycloakPort,
                 adminUsername: keycloakUsername,
                 adminPassword: keycloakPassword)
+            .WithRealmImport("KeycloakRealms")
             .WithLifetime(ContainerLifetime.Persistent)
             .WithDataVolume(KeycloakVolumeName)
             .WithExternalHttpEndpoints()
