@@ -1,4 +1,3 @@
-using CodeClash.Courses.Domains.Courses;
 using CodeClash.Courses.Extensions;
 using CodeClash.Courses.Shared.Constants;
 using Microsoft.Extensions.DependencyInjection;

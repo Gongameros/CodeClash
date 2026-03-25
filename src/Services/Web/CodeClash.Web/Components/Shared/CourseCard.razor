@@ -53,12 +53,3 @@
         </div>
     </MudCardActions>
 </MudCard>
-
-@code {
-    [Parameter, EditorRequired] public CourseListItem Course { get; set; } = null!;
-
-    private void Navigate() => Navigation.NavigateTo($"/courses/{Course.Id}");
-
-    private static string Truncate(string text, int maxLength) =>
-        text.Length <= maxLength ? text : text[..maxLength] + "…";
-}
