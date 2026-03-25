@@ -67,26 +67,29 @@ else
                     }
                 </div>
             </MudItem>
-            <MudItem xs="12" md="4">
-                <MudPaper Class="pa-4" Elevation="4" Style="border-radius: 12px; background: rgba(255,255,255,0.05);">
-                    <MudText Typo="Typo.subtitle2" Style="color: white;" Class="mb-3">Course Actions</MudText>
-                    <MudButton Href="@($"/courses/{_course.Id}/edit")"
-                               Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.Edit"
-                               FullWidth="true"
-                               Class="mb-2">
-                        Edit Course
-                    </MudButton>
-                    <MudButton OnClick="DeleteCourse"
-                               Variant="Variant.Outlined"
-                               Color="Color.Error"
-                               StartIcon="@Icons.Material.Filled.Delete"
-                               FullWidth="true">
-                        Delete Course
-                    </MudButton>
-                </MudPaper>
-            </MudItem>
+            @if (_isOwner)
+            {
+                <MudItem xs="12" md="4">
+                    <MudPaper Class="pa-4" Elevation="4" Style="border-radius: 12px; background: rgba(255,255,255,0.05);">
+                        <MudText Typo="Typo.subtitle2" Style="color: white;" Class="mb-3">Course Actions</MudText>
+                        <MudButton Href="@($"/courses/{_course.Id}/edit")"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   FullWidth="true"
+                                   Class="mb-2">
+                            Edit Course
+                        </MudButton>
+                        <MudButton OnClick="DeleteCourse"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Error"
+                                   StartIcon="@Icons.Material.Filled.Delete"
+                                   FullWidth="true">
+                            Delete Course
+                        </MudButton>
+                    </MudPaper>
+                </MudItem>
+            }
         </MudGrid>
     </MudPaper>
 
@@ -98,12 +101,15 @@ else
                 @_course.Modules.Count modules
             </MudChip>
         </MudText>
-        <MudButton Variant="Variant.Outlined"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="ShowAddModuleDialog">
-            Add Module
-        </MudButton>
+        @if (_isOwner)
+        {
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="ShowAddModuleDialog">
+                Add Module
+            </MudButton>
+        }
     </div>
 
     @if (_course.Modules.Count == 0)
@@ -111,8 +117,11 @@ else
         <MudPaper Class="pa-6 text-center" Elevation="1" Style="border-radius: 12px;">
             <MudIcon Icon="@Icons.Material.Filled.ViewModule" Size="Size.Large" Color="Color.Secondary" Style="font-size: 3rem;" />
             <MudText Typo="Typo.h6" Class="mt-2">No modules yet</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">Start building your course by adding modules</MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ShowAddModuleDialog">Add First Module</MudButton>
+            @if (_isOwner)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">Start building your course by adding modules</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ShowAddModuleDialog">Add First Module</MudButton>
+            }
         </MudPaper>
     }
     else
@@ -137,18 +146,21 @@ else
                             <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
                                 @module.XpReward XP
                             </MudChip>
-                            <span @onclick:stopPropagation="true">
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                               Size="Size.Small"
-                                               Color="Color.Primary"
-                                               OnClick="@(() => ShowEditModuleDialog(module))" />
-                            </span>
-                            <span @onclick:stopPropagation="true">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                               Size="Size.Small"
-                                               Color="Color.Error"
-                                               OnClick="@(() => DeleteModule(module))" />
-                            </span>
+                            @if (_isOwner)
+                            {
+                                <span @onclick:stopPropagation="true">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                   Size="Size.Small"
+                                                   Color="Color.Primary"
+                                                   OnClick="@(() => ShowEditModuleDialog(module))" />
+                                </span>
+                                <span @onclick:stopPropagation="true">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                   Size="Size.Small"
+                                                   Color="Color.Error"
+                                                   OnClick="@(() => DeleteModule(module))" />
+                                </span>
+                            }
                         </div>
                     </TitleContent>
                     <ChildContent>
@@ -159,27 +171,33 @@ else
                                     <div class="d-flex align-center gap-3 w-100 py-1">
                                         <LessonTypeIcon Type="lesson.Type" />
                                         <MudText Typo="Typo.body2" Class="flex-grow-1">@lesson.Title</MudText>
-                                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                                       Size="Size.Small"
-                                                       Color="Color.Primary"
-                                                       OnClick="@(() => Navigation.NavigateTo($"/courses/{_course.Id}/modules/{module.ModuleId}/lessons/{lesson.LessonId}/edit"))" />
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                                       Size="Size.Small"
-                                                       Color="Color.Error"
-                                                       OnClick="@(() => DeleteLesson(module.ModuleId, lesson))" />
+                                        @if (_isOwner)
+                                        {
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                           Size="Size.Small"
+                                                           Color="Color.Primary"
+                                                           OnClick="@(() => Navigation.NavigateTo($"/courses/{_course.Id}/modules/{module.ModuleId}/lessons/{lesson.LessonId}/edit"))" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                           Size="Size.Small"
+                                                           Color="Color.Error"
+                                                           OnClick="@(() => DeleteLesson(module.ModuleId, lesson))" />
+                                        }
                                     </div>
                                 </MudListItem>
                             }
                         </MudList>
-                        <div class="pa-2">
-                            <MudButton Variant="Variant.Text"
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       Size="Size.Small"
-                                       OnClick="@(() => ShowAddLessonDialog(module.ModuleId))">
-                                Add Lesson
-                            </MudButton>
-                        </div>
+                        @if (_isOwner)
+                        {
+                            <div class="pa-2">
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           Size="Size.Small"
+                                           OnClick="@(() => ShowAddLessonDialog(module.ModuleId))">
+                                    Add Lesson
+                                </MudButton>
+                            </div>
+                        }
                     </ChildContent>
                 </MudExpansionPanel>
             }
@@ -241,202 +259,4 @@ else
             </MudButton>
         </DialogActions>
     </MudDialog>
-}
-
-@code {
-    [Parameter] public string CourseId { get; set; } = string.Empty;
-
-    private CourseDetailResponse? _course;
-    private bool _loading = true;
-    private bool _showAddModule;
-    private bool _showAddLesson;
-    private bool _saving;
-    private string _activeModuleId = string.Empty;
-
-    private readonly ModuleFormModel _moduleForm = new();
-    private readonly LessonFormModel _lessonForm = new();
-
-    private List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("Home", href: "/", icon: Icons.Material.Filled.Home),
-        new("Courses", href: "/courses", icon: Icons.Material.Filled.School),
-        new("Loading...", href: null, disabled: true)
-    ];
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadCourseAsync();
-    }
-
-    private async Task LoadCourseAsync()
-    {
-        _loading = true;
-        _course = await CoursesApi.GetCourseByIdAsync(CourseId);
-
-        if (_course is not null)
-        {
-            _breadcrumbs[2] = new(_course.Title, href: null, disabled: true);
-        }
-
-        _loading = false;
-    }
-
-    private void ShowAddModuleDialog()
-    {
-        _moduleForm.Reset();
-        _moduleForm.Order = (_course?.Modules.Count ?? 0);
-        _showAddModule = true;
-    }
-
-    private void ShowEditModuleDialog(ModuleResponse module)
-    {
-        _moduleForm.Title = module.Title;
-        _moduleForm.Description = module.Description ?? string.Empty;
-        _moduleForm.Order = module.Order;
-        _moduleForm.XpReward = module.XpReward;
-        _moduleForm.EditingModuleId = module.ModuleId;
-        _showAddModule = true;
-    }
-
-    private void ShowAddLessonDialog(string moduleId)
-    {
-        _activeModuleId = moduleId;
-        _lessonForm.Reset();
-        _lessonForm.Order = _course?.Modules.FirstOrDefault(m => m.ModuleId == moduleId)?.Lessons.Count ?? 0;
-        _showAddLesson = true;
-    }
-
-    private async Task SaveModule()
-    {
-        if (string.IsNullOrWhiteSpace(_moduleForm.Title)) return;
-        _saving = true;
-        try
-        {
-            if (_moduleForm.EditingModuleId is not null)
-            {
-                await CoursesApi.UpdateModuleAsync(CourseId, _moduleForm.EditingModuleId,
-                    new UpdateModuleRequest(_moduleForm.Title, _moduleForm.Description, _moduleForm.Order, _moduleForm.XpReward));
-                Snackbar.Add("Module updated", Severity.Success);
-            }
-            else
-            {
-                await CoursesApi.AddModuleAsync(CourseId,
-                    new AddModuleRequest(_moduleForm.Title, _moduleForm.Description, _moduleForm.Order, _moduleForm.XpReward));
-                Snackbar.Add("Module added", Severity.Success);
-            }
-            _showAddModule = false;
-            await LoadCourseAsync();
-        }
-        catch
-        {
-            Snackbar.Add("Failed to save module", Severity.Error);
-        }
-        finally { _saving = false; }
-    }
-
-    private async Task SaveLesson()
-    {
-        if (string.IsNullOrWhiteSpace(_lessonForm.Title)) return;
-        _saving = true;
-        try
-        {
-            var content = _lessonForm.Type == LessonType.Theory && !string.IsNullOrWhiteSpace(_lessonForm.Content)
-                ? _lessonForm.Content : null;
-            var response = await CoursesApi.AddLessonAsync(CourseId, _activeModuleId,
-                new AddLessonRequest(_lessonForm.Title, _lessonForm.Type, _lessonForm.Order, content, null));
-            Snackbar.Add("Lesson added", Severity.Success);
-            _showAddLesson = false;
-            await LoadCourseAsync();
-            // Navigate to edit page for further editing
-            if (response?.LessonId is not null)
-                Navigation.NavigateTo($"/courses/{CourseId}/modules/{_activeModuleId}/lessons/{response.LessonId}/edit");
-        }
-        catch
-        {
-            Snackbar.Add("Failed to add lesson", Severity.Error);
-        }
-        finally { _saving = false; }
-    }
-
-    private async Task DeleteModule(ModuleResponse module)
-    {
-        var confirmed = await DialogService.ShowMessageBox("Delete Module",
-            $"Are you sure you want to delete '{module.Title}' and all its lessons?",
-            yesText: "Delete", cancelText: "Cancel");
-        if (confirmed != true) return;
-
-        try
-        {
-            await CoursesApi.DeleteModuleAsync(CourseId, module.ModuleId);
-            Snackbar.Add("Module deleted", Severity.Success);
-            await LoadCourseAsync();
-        }
-        catch { Snackbar.Add("Failed to delete module", Severity.Error); }
-    }
-
-    private async Task DeleteLesson(string moduleId, LessonResponse lesson)
-    {
-        var confirmed = await DialogService.ShowMessageBox("Delete Lesson",
-            $"Are you sure you want to delete '{lesson.Title}'?",
-            yesText: "Delete", cancelText: "Cancel");
-        if (confirmed != true) return;
-
-        try
-        {
-            await CoursesApi.DeleteLessonAsync(CourseId, moduleId, lesson.LessonId);
-            Snackbar.Add("Lesson deleted", Severity.Success);
-            await LoadCourseAsync();
-        }
-        catch { Snackbar.Add("Failed to delete lesson", Severity.Error); }
-    }
-
-    private async Task DeleteCourse()
-    {
-        var confirmed = await DialogService.ShowMessageBox("Delete Course",
-            $"Are you sure you want to delete '{_course!.Title}'? This action cannot be undone.",
-            yesText: "Delete", cancelText: "Cancel");
-        if (confirmed != true) return;
-
-        try
-        {
-            await CoursesApi.DeleteCourseAsync(CourseId);
-            Snackbar.Add("Course deleted", Severity.Success);
-            Navigation.NavigateTo("/courses");
-        }
-        catch { Snackbar.Add("Failed to delete course", Severity.Error); }
-    }
-
-    private class ModuleFormModel
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public int Order { get; set; }
-        public int XpReward { get; set; } = 100;
-        public string? EditingModuleId { get; set; }
-
-        public void Reset()
-        {
-            Title = string.Empty;
-            Description = string.Empty;
-            Order = 0;
-            XpReward = 100;
-            EditingModuleId = null;
-        }
-    }
-
-    private class LessonFormModel
-    {
-        public string Title { get; set; } = string.Empty;
-        public LessonType Type { get; set; } = LessonType.Theory;
-        public int Order { get; set; }
-        public string Content { get; set; } = string.Empty;
-
-        public void Reset()
-        {
-            Title = string.Empty;
-            Type = LessonType.Theory;
-            Order = 0;
-            Content = string.Empty;
-        }
-    }
 }

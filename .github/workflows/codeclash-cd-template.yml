@@ -1,0 +1,116 @@
+name: CD Template
+
+# Aspire deployment via Azure Developer CLI (azd).
+# Each environment maps to a GitHub Environment with its own secrets and protection rules.
+#
+# Required GitHub Environment secrets (per environment):
+#   AZURE_CLIENT_ID        — App Registration client ID (for OIDC federated login)
+#   AZURE_TENANT_ID        — Azure tenant ID
+#   AZURE_SUBSCRIPTION_ID  — Azure subscription ID
+#
+# Required GitHub Environment variables (per environment):
+#   AZURE_LOCATION         — Azure region, e.g. "westeurope"
+#   AZURE_RESOURCE_GROUP   — Resource group name, e.g. "rg-codeclash-dev"
+#   AZD_ENVIRONMENT_NAME   — azd environment name, e.g. "codeclash-dev"
+#
+# Optional secrets forwarded to azd for provisioning:
+#   INTERNAL_API_KEY       — Value for the Aspire "internal-api-key" parameter
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target environment (dev | staging | production)'
+        type: string
+        required: true
+      dotnet-version:
+        description: .NET SDK version
+        type: string
+        default: '10.x'
+      build-version:
+        description: Build version tag (commit SHA short)
+        type: string
+        default: ''
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      INTERNAL_API_KEY:
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    permissions:
+      id-token: write   # required for OIDC login
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Install Azure Developer CLI
+        uses: azure/setup-azd@v2
+
+      - name: Login to Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: azd auth login (federated)
+        run: |
+          azd auth login \
+            --client-id "${{ secrets.AZURE_CLIENT_ID }}" \
+            --federated-credential-provider "github" \
+            --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
+
+      - name: Initialize azd environment
+        run: |
+          azd env new "${{ vars.AZD_ENVIRONMENT_NAME }}" \
+            --location "${{ vars.AZURE_LOCATION }}" \
+            --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            --no-prompt || \
+          azd env select "${{ vars.AZD_ENVIRONMENT_NAME }}"
+
+      - name: Configure azd environment variables
+        run: |
+          azd env set AZURE_RESOURCE_GROUP "${{ vars.AZURE_RESOURCE_GROUP }}"
+          azd env set ENVIRONMENT_NAME "${{ inputs.environment }}"
+          if [ -n "${{ inputs.build-version }}" ]; then
+            azd env set BUILD_VERSION "${{ inputs.build-version }}"
+          fi
+
+      - name: Set Aspire parameters
+        if: ${{ secrets.INTERNAL_API_KEY != '' }}
+        run: |
+          azd env set INTERNAL_API_KEY "${{ secrets.INTERNAL_API_KEY }}"
+
+      - name: Provision infrastructure
+        run: azd provision --no-prompt
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+
+      - name: Deploy application
+        run: azd deploy --no-prompt
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+
+      - name: Print deployment endpoints
+        run: azd show --output json | jq '.services[].endpoints'

@@ -1,0 +1,49 @@
+name: Production Pipeline
+
+on:
+  # Manual trigger only — production deploys require explicit intent
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        type: string
+        required: true
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false   # do not cancel in-flight production deploys
+
+jobs:
+  guard:
+    name: Confirm deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+            echo "Deployment not confirmed. Type 'deploy' to proceed."
+            exit 1
+          fi
+
+  ci:
+    name: CI
+    needs: guard
+    uses: ./.github/workflows/codeclash-ci-template.yml
+    with:
+      dotnet-version: '10.x'
+      run-tests: true
+      upload-artifacts: true
+
+  cd:
+    name: CD
+    needs: ci
+    uses: ./.github/workflows/codeclash-cd-template.yml
+    with:
+      environment: production
+      dotnet-version: '10.x'
+      build-version: ${{ needs.ci.outputs.build-version }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
