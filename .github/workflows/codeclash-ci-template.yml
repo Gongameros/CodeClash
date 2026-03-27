@@ -97,22 +97,93 @@ jobs:
             --configuration Release \
             --logger "trx;LogFileName=test-results.trx" \
             --collect:"XPlat Code Coverage" \
-            --results-directory ./test-results
+            --settings ${{ github.workspace }}/coverlet.runsettings \
+            --results-directory ./test-results/${{ strategy.job-index }}
         env:
           DOTNET_ENVIRONMENT: Test
 
-      - name: Upload test results
+      - name: Upload coverage xml
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ strategy.job-index }}
-          path: ./test-results/**/*.trx
-          retention-days: 7
+          name: coverage-xml-${{ strategy.job-index }}
+          path: ./test-results/${{ strategy.job-index }}/**/coverage.cobertura.xml
 
-      - name: Upload coverage
-        if: always()
+  test-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: build
+    if: inputs.run-tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Restore
+        run: dotnet restore tests/CodeClash.E2E.Tests/CodeClash.E2E.Tests.csproj
+
+      - name: Build E2E tests
+        run: |
+          dotnet build tests/CodeClash.E2E.Tests/CodeClash.E2E.Tests.csproj \
+            --no-restore \
+            --configuration Release
+
+      - name: Install Playwright browsers
+        shell: pwsh
+        run: |
+          $playwrightScript = Get-ChildItem -Recurse -Filter "playwright.ps1" `
+            -Path tests/CodeClash.E2E.Tests/bin/Release `
+            | Select-Object -First 1 -ExpandProperty FullName
+          & $playwrightScript install --with-deps chromium
+
+      - name: Run E2E tests
+        run: |
+          dotnet test tests/CodeClash.E2E.Tests/CodeClash.E2E.Tests.csproj \
+            --no-restore \
+            --no-build \
+            --configuration Release \
+            --logger "trx;LogFileName=test-results.trx" \
+            --collect:"XPlat Code Coverage" \
+            --settings ${{ github.workspace }}/coverlet.runsettings \
+            --results-directory ./test-results/e2e
+        env:
+          DOTNET_ENVIRONMENT: Test
+
+  coverage:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    needs: [test, test-e2e]
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: coverage-input
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Add tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Generate merged HTML report
+        run: |
+          reportgenerator \
+            -reports:coverage-input/**/coverage.cobertura.xml \
+            -targetdir:coverage-report \
+            -reporttypes:"HtmlSummary;Html"
+
+      - name: Upload coverage html
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ strategy.job-index }}
-          path: ./test-results/**/coverage.cobertura.xml
-          retention-days: 7
+          name: coverage-report
+          path: coverage-report

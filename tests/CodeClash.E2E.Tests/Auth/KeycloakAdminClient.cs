@@ -109,6 +109,8 @@ public class KeycloakAdminClient
     {
         var update = new
         {
+            publicClient = true,
+            directAccessGrantsEnabled = true,
             redirectUris = new[] { $"{_webBaseUrl}/*", "http://localhost:*/*" },
             webOrigins = new[] { "*" },
             attributes = new Dictionary<string, string>
@@ -160,21 +162,38 @@ public class KeycloakAdminClient
 
     private async Task AuthenticateAsync()
     {
-        var tokenRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+        const int maxRetries = 10;
+        HttpResponseMessage? lastResponse = null;
+
+        for (var attempt = 0; attempt < maxRetries; attempt++)
         {
-            ["grant_type"] = "password",
-            ["client_id"] = "admin-cli",
-            ["username"] = "admin",
-            ["password"] = _adminPassword
-        });
+            if (attempt > 0)
+                await Task.Delay(TimeSpan.FromSeconds(Math.Min(2 * attempt, 10)));
 
-        var response = await _http.PostAsync(
-            "/realms/master/protocol/openid-connect/token", tokenRequest);
-        response.EnsureSuccessStatusCode();
+            var tokenRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["grant_type"] = "password",
+                ["client_id"] = "admin-cli",
+                ["username"] = "admin",
+                ["password"] = _adminPassword
+            });
 
-        var token = await response.Content.ReadFromJsonAsync<TokenResponse>();
-        _http.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+            lastResponse = await _http.PostAsync(
+                "/realms/master/protocol/openid-connect/token", tokenRequest);
+
+            if (lastResponse.IsSuccessStatusCode)
+            {
+                var token = await lastResponse.Content.ReadFromJsonAsync<TokenResponse>();
+                _http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+                return;
+            }
+        }
+
+        var body = lastResponse is not null ? await lastResponse.Content.ReadAsStringAsync() : "no response";
+        throw new HttpRequestException(
+            $"Keycloak admin auth failed after {maxRetries} attempts. " +
+            $"Status: {lastResponse?.StatusCode}, Body: {body}");
     }
 
     private sealed class TokenResponse

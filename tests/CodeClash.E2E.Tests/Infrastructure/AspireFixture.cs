@@ -1,6 +1,8 @@
 using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using CodeClash.Shared.Constants;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CodeClash.E2E.Tests.Infrastructure;
 
@@ -16,7 +18,7 @@ public class AspireFixture : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         var appHost = await DistributedApplicationTestingBuilder
-            .CreateAsync<Projects.CodeClash_AppHost>();
+            .CreateAsync<Projects.CodeClash_AppHost>(["--Testing:IsE2E=true"]);
 
         // Read the keycloak password from configuration (loaded from user secrets)
         KeycloakAdminPassword = appHost.Configuration["Parameters:keycloak-password"] ?? "admin";
@@ -28,6 +30,11 @@ public class AspireFixture : IAsyncLifetime
         _app = await appHost.BuildAsync();
         var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         await _app.StartAsync(cts.Token);
+
+        // Wait for Keycloak and Web to be healthy before proceeding
+        var notifications = _app.Services.GetRequiredService<ResourceNotificationService>();
+        await notifications.WaitForResourceHealthyAsync(Resources.Keycloak, cts.Token);
+        await notifications.WaitForResourceAsync(Resources.WebService, KnownResourceStates.Running, cts.Token);
 
         // Extract endpoints
         WebBaseUrl = _app.GetEndpoint(Resources.WebService, "https")?.ToString()

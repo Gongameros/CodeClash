@@ -11,13 +11,13 @@ public class EditCoursePage
         _baseUrl = baseUrl;
     }
 
-    public ILocator PageHeading => _page.GetByText("Edit Course");
-    public ILocator TitleInput => _page.Locator("input").First;
-    public ILocator DescriptionInput => _page.Locator("textarea").First;
+    public ILocator PageHeading => _page.GetByText("Edit Course", new() { Exact = true });
+    public ILocator TitleInput => _page.GetByLabel("Course Title");
+    public ILocator DescriptionInput => _page.GetByLabel("Description");
     public ILocator DifficultySelect => _page.Locator(".mud-select").First;
     public ILocator ThumbnailInput => _page.GetByPlaceholder("https://...");
     public ILocator SaveButton => _page.GetByRole(AriaRole.Button, new() { Name = "Save Changes" });
-    public ILocator CancelButton => _page.GetByRole(AriaRole.Link, new() { Name = "Cancel" });
+    public ILocator CancelButton => _page.GetByRole(AriaRole.Link, new() { Name = "Cancel", Exact = true });
     public ILocator PublishSwitch => _page.Locator(".mud-switch");
     public ILocator LoadingSkeletons => _page.Locator(".mud-skeleton");
     public ILocator NotFoundAlert => _page.GetByText("Course not found");
@@ -32,7 +32,8 @@ public class EditCoursePage
         _page.Locator(".mud-chip").Filter(new LocatorFilterOptions { HasText = techName });
 
     // Preview
-    public ILocator PreviewTitle => _page.Locator("text=Preview").Locator("..").Locator("..").Locator(".mud-typography-h6");
+    public ILocator PreviewPanel => _page.Locator(".mud-grid-item-md-4");
+    public ILocator PreviewTitle => PreviewPanel.Locator(".mud-typography-h6");
 
     public async Task NavigateAsync(string courseId)
     {

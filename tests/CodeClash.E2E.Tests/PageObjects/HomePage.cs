@@ -17,7 +17,7 @@ public class HomePage
     public ILocator ViewAllButton => _page.GetByRole(AriaRole.Link, new() { Name = "View All" });
 
     // Stats
-    public ILocator CoursesAvailableStat => _page.GetByText("Courses Available");
+    public ILocator CoursesAvailableStat => _page.GetByText("Courses Available", new() { Exact = true });
     public ILocator LearnersEnrolledStat => _page.GetByText("Learners Enrolled");
     public ILocator TotalXpStat => _page.GetByText("Total XP to Earn");
 

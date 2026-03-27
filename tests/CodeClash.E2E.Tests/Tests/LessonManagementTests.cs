@@ -91,13 +91,14 @@ public class LessonManagementTests : BaseE2ETest
 
         await lessonDeleteButton.ClickAsync();
 
-        // Confirm deletion if dialog appears
-        var confirmButton = Page.GetByRole(AriaRole.Button, new() { Name = "Yes" })
-            .Or(Page.GetByRole(AriaRole.Button, new() { Name = "OK" }))
-            .Or(Page.GetByRole(AriaRole.Button, new() { Name = "Delete" }));
+        // Wait for MudBlazor confirmation dialog to fully render
+        var confirmDialog = Page.Locator(".mud-message-box");
+        await confirmDialog.WaitForAsync(new LocatorWaitForOptions { Timeout = 5_000 });
+        await Page.WaitForTimeoutAsync(500); // Wait for dialog animation
 
-        if (await confirmButton.First.IsVisibleAsync())
-            await confirmButton.First.ClickAsync();
+        // Click "Delete" button inside the message box dialog
+        var confirmButton = confirmDialog.GetByRole(AriaRole.Button, new() { Name = "Delete" });
+        await confirmButton.ClickAsync();
 
         await Page.WaitForTimeoutAsync(1000);
 

@@ -34,17 +34,19 @@ public class CourseDetailPage
     public ILocator ModulePanels => _page.Locator(".mud-expand-panel");
 
     // Module dialog
-    public ILocator ModuleTitleInput => _page.Locator(".mud-dialog input").First;
-    public ILocator ModuleDescriptionInput => _page.Locator(".mud-dialog textarea").First;
-    public ILocator ModuleOrderInput => _page.Locator(".mud-dialog .mud-input-numeric input").First;
-    public ILocator ModuleXpInput => _page.Locator(".mud-dialog .mud-input-numeric input").Last;
-    public ILocator SaveModuleButton => _page.Locator(".mud-dialog").GetByRole(AriaRole.Button, new() { Name = "Add Module" });
-    public ILocator SaveModuleChangesButton => _page.Locator(".mud-dialog").GetByRole(AriaRole.Button, new() { Name = "Save Changes" });
-    public ILocator CancelDialogButton => _page.Locator(".mud-dialog").GetByRole(AriaRole.Button, new() { Name = "Cancel" });
+    public ILocator ModuleDialog => _page.Locator(".mud-dialog");
+    public ILocator ModuleTitleInput => ModuleDialog.GetByLabel("Title");
+    public ILocator ModuleDescriptionInput => ModuleDialog.GetByLabel("Description");
+    public ILocator ModuleOrderInput => ModuleDialog.GetByLabel("Order");
+    public ILocator ModuleXpInput => ModuleDialog.GetByLabel("XP Reward");
+    public ILocator SaveModuleButton => ModuleDialog.GetByRole(AriaRole.Button, new() { Name = "Add Module" });
+    public ILocator SaveModuleChangesButton => ModuleDialog.GetByRole(AriaRole.Button, new() { Name = "Save Changes" });
+    public ILocator CancelDialogButton => ModuleDialog.GetByRole(AriaRole.Button, new() { Name = "Cancel" });
 
     // Lesson dialog
-    public ILocator LessonTitleInput => _page.Locator(".mud-dialog input").First;
-    public ILocator SaveLessonButton => _page.Locator(".mud-dialog").GetByRole(AriaRole.Button, new() { Name = "Add Lesson" });
+    public ILocator LessonDialog => _page.Locator(".mud-dialog");
+    public ILocator LessonTitleInput => LessonDialog.GetByLabel("Title");
+    public ILocator SaveLessonButton => LessonDialog.GetByRole(AriaRole.Button, new() { Name = "Add Lesson" });
 
     public ILocator AddLessonButton(int moduleIndex) =>
         ModulePanels.Nth(moduleIndex).GetByRole(AriaRole.Button, new() { Name = "Add Lesson" });
@@ -70,6 +72,8 @@ public class CourseDetailPage
 
     public async Task FillModuleDialogAsync(string title, string description, int order = 0, int xp = 100)
     {
+        // Wait for dialog to be fully rendered
+        await ModuleDialog.WaitForAsync(new LocatorWaitForOptions { Timeout = 10_000 });
         await ModuleTitleInput.FillAsync(title);
         await ModuleDescriptionInput.FillAsync(description);
         await ModuleOrderInput.FillAsync(order.ToString());

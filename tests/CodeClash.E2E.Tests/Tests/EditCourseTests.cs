@@ -38,7 +38,7 @@ public class EditCourseTests : BaseE2ETest
 
         await editPage.SaveButton.ClickAsync();
 
-        await WaitForSnackbarAsync("saved");
+        await WaitForSnackbarAsync("Course updated successfully!");
 
         // Verify we're redirected
         await Page.WaitForURLAsync($"**/courses/{courseId}",
@@ -68,7 +68,7 @@ public class EditCourseTests : BaseE2ETest
         await editPage.NavigateAsync(courseId);
         await editPage.WaitForLoadedAsync();
 
-        var previewHeading = Page.GetByText("Preview");
+        var previewHeading = Page.GetByText("Preview", new() { Exact = true });
         (await previewHeading.IsVisibleAsync()).ShouldBeTrue();
     }
 

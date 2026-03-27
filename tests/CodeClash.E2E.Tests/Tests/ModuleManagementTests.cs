@@ -102,21 +102,19 @@ public class ModuleManagementTests : BaseE2ETest
         await detailPage.WaitForLoadedAsync();
         (await detailPage.ModulePanels.CountAsync()).ShouldBe(1);
 
-        // Delete the module
-        var deleteButton = detailPage.ModulePanels.First
-            .Locator("button").Filter(new LocatorFilterOptions { Has = Page.Locator("[data-testid='DeleteIcon']") });
-
-        // Use the icon button for delete
-        var moduleDeleteBtn = detailPage.ModulePanels.First.Locator(".mud-icon-button").Last;
+        // Delete the module — click the delete icon button (Color.Error) in the module header
+        var moduleHeader = detailPage.ModulePanels.First.Locator(".mud-expand-panel-header");
+        var moduleDeleteBtn = moduleHeader.Locator("button.mud-icon-button").Last;
         await moduleDeleteBtn.ClickAsync();
 
-        // Confirm deletion dialog if present
-        var confirmButton = Page.GetByRole(AriaRole.Button, new() { Name = "Yes" })
-            .Or(Page.GetByRole(AriaRole.Button, new() { Name = "OK" }))
-            .Or(Page.GetByRole(AriaRole.Button, new() { Name = "Delete" }));
+        // Wait for MudBlazor confirmation dialog to fully render
+        var confirmDialog = Page.Locator(".mud-message-box");
+        await confirmDialog.WaitForAsync(new LocatorWaitForOptions { Timeout = 5_000 });
+        await Page.WaitForTimeoutAsync(500); // Wait for dialog animation
 
-        if (await confirmButton.First.IsVisibleAsync())
-            await confirmButton.First.ClickAsync();
+        // Click "Delete" button inside the message box dialog
+        var confirmButton = confirmDialog.GetByRole(AriaRole.Button, new() { Name = "Delete" });
+        await confirmButton.ClickAsync();
 
         await Page.WaitForTimeoutAsync(1000);
 

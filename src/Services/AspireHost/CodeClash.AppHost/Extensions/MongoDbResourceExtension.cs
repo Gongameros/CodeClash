@@ -11,12 +11,21 @@ public static class MongoDbResourceExtension
         var mongoUsername = builder.AddParameter("mongo-username", "admin");
         var mongoPassword = builder.AddParameter("mongo-password", secret: true);
 
-        return builder.AddMongoDB(
+        var isE2E = builder.Configuration["Testing:IsE2E"] == "true";
+
+        var mongo = builder.AddMongoDB(
                 name: resourceName,
                 userName: mongoUsername,
                 password: mongoPassword,
-                port: MongoDbPort)
-            .WithLifetime(ContainerLifetime.Persistent)
-            .WithDataVolume(MongoDbVolumeName);
+                port: isE2E ? null : MongoDbPort);
+
+        if (!isE2E)
+        {
+            mongo
+                .WithLifetime(ContainerLifetime.Persistent)
+                .WithDataVolume(MongoDbVolumeName);
+        }
+
+        return mongo;
     }
 }

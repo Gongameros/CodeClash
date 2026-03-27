@@ -1,0 +1,19 @@
+<!-- coverlet.runsettings -->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Include>[CodeClash.*]*</Include>
+          <Exclude>
+            [CodeClash.*.Tests]*;
+            [CodeClash.AppHost]*;
+            [CodeClash.ServiceDefaults]*;
+            [CodeClash.Shared]*
+          </Exclude>
+          <ExcludeByAttribute>GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

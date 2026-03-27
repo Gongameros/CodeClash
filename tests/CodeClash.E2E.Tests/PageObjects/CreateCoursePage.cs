@@ -21,16 +21,19 @@ public class CreateCoursePage
     public ILocator DifficultySelect => _page.Locator(".mud-select").First;
     public ILocator ThumbnailInput => _page.GetByPlaceholder("https://...");
 
+    // Scope selectors to the main form area (exclude Live Preview panel)
+    private ILocator FormArea => _page.Locator(".mud-grid-item-md-8");
+
     // Step 1: Technologies
     public ILocator TechChip(string techName) =>
-        _page.Locator(".mud-chip").Filter(new LocatorFilterOptions { HasText = techName });
+        FormArea.Locator(".mud-chip").Filter(new LocatorFilterOptions { HasText = techName });
 
-    public ILocator SelectedTechCount => _page.Locator("text=/\\d+ selected:/");
+    public ILocator SelectedTechCount => FormArea.Locator("text=/\\d+ selected:/");
 
     // Step 2: Tags
     public ILocator TagInput => _page.GetByPlaceholder("e.g. algorithms, data-structures");
     public ILocator AddTagButton => _page.GetByRole(AriaRole.Button, new() { Name = "Add" });
-    public ILocator TagChips => _page.Locator(".mud-chip").Filter(new LocatorFilterOptions { HasText = "#" });
+    public ILocator TagChips => FormArea.Locator(".mud-chip").Filter(new LocatorFilterOptions { HasText = "#" });
 
     // Step 3: Review
     public ILocator PublishToggle => _page.Locator(".mud-switch");
@@ -53,6 +56,8 @@ public class CreateCoursePage
     {
         await TitleInput.FillAsync(title);
         await DescriptionInput.FillAsync(description);
+        // Wait for Blazor Server SignalR round-trip to process bindings
+        await _page.WaitForTimeoutAsync(500);
     }
 
     public async Task SelectDifficultyAsync(string difficulty)
@@ -64,12 +69,17 @@ public class CreateCoursePage
     public async Task SelectTechAsync(string techName)
     {
         await TechChip(techName).ClickAsync();
+        await _page.WaitForTimeoutAsync(300);
     }
 
     public async Task AddTagAsync(string tag)
     {
         await TagInput.FillAsync(tag);
+        // Wait for Blazor to enable the Add button
+        await _page.WaitForTimeoutAsync(300);
         await AddTagButton.ClickAsync();
+        // Wait for chip to render
+        await _page.WaitForTimeoutAsync(300);
     }
 
     public async Task GoToNextStepAsync()

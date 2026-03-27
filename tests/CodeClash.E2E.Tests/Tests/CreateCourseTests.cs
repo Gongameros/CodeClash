@@ -63,7 +63,8 @@ public class CreateCourseTests : BaseE2ETest
 
         await createPage.FillBasicInfoAsync("Test Title", "Test Description");
 
-        (await createPage.NextButton.IsDisabledAsync()).ShouldBeFalse();
+        await Assertions.Expect(createPage.NextButton).ToBeEnabledAsync(
+            new() { Timeout = 5_000 });
     }
 
     [Fact]
@@ -77,11 +78,13 @@ public class CreateCourseTests : BaseE2ETest
         // Select C#
         await createPage.SelectTechAsync("C#");
         var selectedText = Page.Locator("text=/1 selected:/");
-        (await selectedText.IsVisibleAsync()).ShouldBeTrue();
+        await Assertions.Expect(selectedText).ToBeVisibleAsync(
+            new() { Timeout = 5_000 });
 
         // Deselect C#
         await createPage.SelectTechAsync("C#");
-        (await selectedText.IsVisibleAsync()).ShouldBeFalse();
+        await Assertions.Expect(selectedText).Not.ToBeVisibleAsync(
+            new() { Timeout = 5_000 });
     }
 
     [Fact]
@@ -95,15 +98,18 @@ public class CreateCourseTests : BaseE2ETest
 
         // Add tags
         await createPage.AddTagAsync("test-tag");
-        (await createPage.TagChips.CountAsync()).ShouldBe(1);
+        await Assertions.Expect(createPage.TagChips).ToHaveCountAsync(1,
+            new() { Timeout = 5_000 });
 
         await createPage.AddTagAsync("another-tag");
-        (await createPage.TagChips.CountAsync()).ShouldBe(2);
+        await Assertions.Expect(createPage.TagChips).ToHaveCountAsync(2,
+            new() { Timeout = 5_000 });
 
         // Remove first tag by clicking close button
         var closeButton = createPage.TagChips.First.Locator("button").First;
         await closeButton.ClickAsync();
-        (await createPage.TagChips.CountAsync()).ShouldBe(1);
+        await Assertions.Expect(createPage.TagChips).ToHaveCountAsync(1,
+            new() { Timeout = 5_000 });
     }
 
     [Fact]

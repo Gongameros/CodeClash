@@ -28,7 +28,7 @@ public class AuthenticationFlowTests : IAsyncLifetime
         await _page.GotoAsync(_fixture.WebBaseUrl,
             new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
 
-        var heroText = _page.GetByText("<CodeClash />");
+        var heroText = _page.Locator("h3").GetByText("<CodeClash />");
         await heroText.WaitForAsync();
         (await heroText.IsVisibleAsync()).ShouldBeTrue();
     }
