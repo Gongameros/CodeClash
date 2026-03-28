@@ -29,12 +29,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
 
@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload build artifacts
         if: inputs.upload-artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: build-${{ steps.version.outputs.version }}
           path: |
@@ -66,7 +66,7 @@ jobs:
           retention-days: 3
 
   test:
-    name: Test
+    name: Test (${{ matrix.name }})
     runs-on: ubuntu-latest
     needs: build
     if: inputs.run-tests
@@ -74,40 +74,51 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-project:
-          - src/Services/Courses/CodeClash.Courses.Tests/CodeClash.Courses.Tests.csproj
-          - src/Services/Coders/CodeClash.Coders.Tests/CodeClash.Coders.Tests.csproj
+        include:
+          - name: Courses
+            test-projects: src/Services/Courses/CodeClash.Courses.Tests/CodeClash.Courses.Tests.csproj
+          - name: Coders
+            test-projects: src/Services/Coders/CodeClash.Coders.Tests/CodeClash.Coders.Tests.csproj
+          - name: BuildingBlocks
+            test-projects: >-
+              src/BuildingBlocks/Identity/CodeClash.Identity.Tests/CodeClash.Identity.Tests.csproj
+              src/BuildingBlocks/Results/CodeClash.Results.Tests/CodeClash.Results.Tests.csproj
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
 
       - name: Restore
-        run: dotnet restore ${{ matrix.test-project }}
+        run: |
+          for project in ${{ matrix.test-projects }}; do
+            dotnet restore "$project"
+          done
 
       - name: Run tests
         run: |
-          dotnet test ${{ matrix.test-project }} \
-            --no-restore \
-            --configuration Release \
-            --logger "trx;LogFileName=test-results.trx" \
-            --collect:"XPlat Code Coverage" \
-            --settings ${{ github.workspace }}/coverlet.runsettings \
-            --results-directory ./test-results/${{ strategy.job-index }}
+          for project in ${{ matrix.test-projects }}; do
+            dotnet test "$project" \
+              --no-restore \
+              --configuration Release \
+              --logger "trx;LogFileName=test-results.trx" \
+              --collect:"XPlat Code Coverage" \
+              --settings ${{ github.workspace }}/coverlet.runsettings \
+              --results-directory ./test-results/${{ matrix.name }}
+          done
         env:
           DOTNET_ENVIRONMENT: Test
 
       - name: Upload coverage xml
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: coverage-xml-${{ strategy.job-index }}
-          path: ./test-results/${{ strategy.job-index }}/**/coverage.cobertura.xml
+          name: coverage-xml-${{ matrix.name }}
+          path: ./test-results/${{ matrix.name }}/**/coverage.cobertura.xml
 
   test-e2e:
     name: E2E Tests
@@ -117,12 +128,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Setup HTTPS dev cert
+        run: |
+          dotnet dev-certs https --clean
+          export SSL_CERT_DIR="$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs"
+          echo "SSL_CERT_DIR=$SSL_CERT_DIR" >> $GITHUB_ENV
+          dotnet dev-certs https --trust
+          mkdir -p $HOME/.aspnet/https
+          dotnet dev-certs https --export-path $HOME/.aspnet/https/devcert.pfx --password "ci-dev-cert" --format Pfx
+          echo "ASPNETCORE_Kestrel__Certificates__Default__Path=$HOME/.aspnet/https/devcert.pfx" >> $GITHUB_ENV
+          echo "ASPNETCORE_Kestrel__Certificates__Default__Password=ci-dev-cert" >> $GITHUB_ENV
 
       - name: Restore
         run: dotnet restore tests/CodeClash.E2E.Tests/CodeClash.E2E.Tests.csproj
@@ -147,12 +169,15 @@ jobs:
             --no-restore \
             --no-build \
             --configuration Release \
+            --verbosity normal \
+            --logger "console;verbosity=detailed" \
             --logger "trx;LogFileName=test-results.trx" \
             --collect:"XPlat Code Coverage" \
             --settings ${{ github.workspace }}/coverlet.runsettings \
             --results-directory ./test-results/e2e
         env:
-          DOTNET_ENVIRONMENT: Test
+          ASPNETCORE_ENVIRONMENT: Development
+          DOTNET_ENVIRONMENT: Development
 
   coverage:
     name: Coverage Report
@@ -162,12 +187,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download coverage artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
+          pattern: coverage-xml-*
           path: coverage-input
+
+      - name: List coverage files
+        run: find coverage-input -name "coverage.cobertura.xml" -type f || echo "No coverage files found"
 
       - name: Install ReportGenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
@@ -183,7 +212,7 @@ jobs:
             -reporttypes:"HtmlSummary;Html"
 
       - name: Upload coverage html
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report
           path: coverage-report

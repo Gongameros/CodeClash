@@ -7,7 +7,7 @@ namespace CodeClash.Courses.Tests.Infrastructure;
 
 public sealed class MongoDbFixture : IAsyncLifetime
 {
-    private readonly MongoDbContainer _container = new MongoDbBuilder().Build();
+    private readonly MongoDbContainer _container = new MongoDbBuilder("mongo:latest").Build();
 
     public IMongoClient Client { get; private set; } = null!;
     public IMongoDatabase Database { get; private set; } = null!;

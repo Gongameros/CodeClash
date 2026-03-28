@@ -18,7 +18,7 @@ public class E2EFixture : IAsyncLifetime
 
         // Ensure test users exist in Keycloak (realm + clients already exist from dev setup)
         var keycloakAdmin = new KeycloakAdminClient(
-            _aspire.KeycloakBaseUrl, _aspire.KeycloakAdminPassword, _aspire.WebBaseUrl);
+            _aspire.KeycloakBaseUrl, AspireFixture.KeycloakAdminPassword, _aspire.WebBaseUrl);
         await keycloakAdmin.EnsureTestUsersAsync();
     }
 

@@ -6,7 +6,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
     </PropertyGroup>
+
+    <ItemGroup>
+      <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector">
