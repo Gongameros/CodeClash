@@ -22,7 +22,12 @@ public static class KeycloakResourceExtension
                 adminUsername: keycloakUsername,
                 adminPassword: keycloakPassword)
             .WithRealmImport("KeycloakRealms")
-            .WithExternalHttpEndpoints()
+            .WithEndpoint("http", endpoint =>
+            {
+                endpoint.IsExternal = true;
+                endpoint.Port = null;
+                endpoint.TargetPort = 8080;
+            })
             .WithOtlpExporter();
 
         if (!isE2E)
