@@ -10,15 +10,15 @@ namespace CodeClash.Courses.Tests.Tests.Integration.Courses;
 [Collection(IntegrationCollection.Name)]
 public sealed class GetCourseByIdTests(IntegrationFixture fixture) : IAsyncLifetime
 {
-    public Task InitializeAsync() => fixture.ResetAsync();
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => new(fixture.ResetAsync());
+    public ValueTask DisposeAsync() => default;
 
     [Fact]
     public async Task Handle_ExistingCourse_ReturnsCourseDetail()
     {
-        var courseId = (await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Test Course"))).Value.Id;
+        var courseId = (await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Test Course"), Ct.Token)).Value.Id;
 
-        var result = await fixture.Mediator.Send(new GetCourseByIdQuery(courseId));
+        var result = await fixture.Mediator.Send(new GetCourseByIdQuery(courseId), Ct.Token);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldBe(courseId);
@@ -31,7 +31,7 @@ public sealed class GetCourseByIdTests(IntegrationFixture fixture) : IAsyncLifet
     {
         var fakeId = MongoHelper.RandomId();
 
-        var result = await fixture.Mediator.Send(new GetCourseByIdQuery(fakeId));
+        var result = await fixture.Mediator.Send(new GetCourseByIdQuery(fakeId), Ct.Token);
 
         result.IsFailure.ShouldBeTrue();
         result.FirstError.Code.ShouldBe(CourseErrors.NotFound(fakeId).Code);
@@ -40,11 +40,11 @@ public sealed class GetCourseByIdTests(IntegrationFixture fixture) : IAsyncLifet
     [Fact]
     public async Task Handle_CourseWithModulesAndLessons_ReturnsFullHierarchy()
     {
-        var courseId = (await fixture.Mediator.Send(CourseFactory.CreateCommand())).Value.Id;
-        var moduleId = (await fixture.Mediator.Send(ModuleFactory.CreateCommand(courseId))).Value.ModuleId;
-        await fixture.Mediator.Send(LessonFactory.CreateCommand(courseId, moduleId));
+        var courseId = (await fixture.Mediator.Send(CourseFactory.CreateCommand(), Ct.Token)).Value.Id;
+        var moduleId = (await fixture.Mediator.Send(ModuleFactory.CreateCommand(courseId), Ct.Token)).Value.ModuleId;
+        await fixture.Mediator.Send(LessonFactory.CreateCommand(courseId, moduleId), Ct.Token);
 
-        var result = await fixture.Mediator.Send(new GetCourseByIdQuery(courseId));
+        var result = await fixture.Mediator.Send(new GetCourseByIdQuery(courseId), Ct.Token);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Modules.Count.ShouldBe(1);

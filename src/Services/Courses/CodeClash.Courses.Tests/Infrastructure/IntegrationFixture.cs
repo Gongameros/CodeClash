@@ -13,7 +13,7 @@ public sealed class IntegrationFixture : IAsyncLifetime
     public IMediator Mediator { get; private set; } = null!;
     public IMongoCollection<Course> Courses { get; private set; } = null!;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await _mongoDb.InitializeAsync();
 
@@ -33,7 +33,7 @@ public sealed class IntegrationFixture : IAsyncLifetime
 
     public Task ResetAsync() => _mongoDb.CleanupAsync();
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _services.DisposeAsync();
         await _mongoDb.DisposeAsync();

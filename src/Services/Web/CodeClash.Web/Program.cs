@@ -29,8 +29,9 @@ builder.Services.AddHttpClient(HttpClientNames.KeycloakBackchannel, client =>
 {
     // Use the fixed HTTP port so the backchannel refresh URL is stable across Aspire restarts.
     // KC_HOSTNAME on the container forces this same URL as the token issuer.
-    var keycloakBaseUrl = builder.Configuration["CODECLASH_KEYCLOAK_HTTP"]
-        ?? builder.Configuration["CODECLASH_KEYCLOAK_HTTPS"];
+    var keycloakBaseUrl = builder.Configuration["CODECLASH_KEYCLOAK_HTTPS"] ??
+                          builder.Configuration["CODECLASH_KEYCLOAK_HTTP"];
+
     client.BaseAddress = new Uri(keycloakBaseUrl!);
 });
 

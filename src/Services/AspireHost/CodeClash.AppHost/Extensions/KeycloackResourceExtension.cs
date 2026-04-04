@@ -10,17 +10,27 @@ public static class KeycloakResourceExtension
     public static IResourceBuilder<KeycloakResource> AddKeycloakResource(
         this IDistributedApplicationBuilder builder)
     {
+        var isE2E = builder.Configuration["Testing:IsE2E"] == "true";
+
         var keycloakUsername = builder.AddParameter("keycloak-username", "admin");
         var keycloakPassword = builder.AddParameter("keycloak-password", secret: true);
 
-        return builder.AddKeycloak(
+        // Use a random port for tests to avoid conflicts with the dev container
+        var keycloak = builder.AddKeycloak(
                 name: Resources.Keycloak,
-                port: KeycloakPort,
+                port: isE2E ? null : KeycloakPort,
                 adminUsername: keycloakUsername,
                 adminPassword: keycloakPassword)
-            .WithLifetime(ContainerLifetime.Persistent)
-            .WithDataVolume(KeycloakVolumeName)
+            .WithRealmImport("KeycloakRealms")
             .WithExternalHttpEndpoints()
             .WithOtlpExporter();
+
+        if (!isE2E)
+        {
+            keycloak.WithLifetime(ContainerLifetime.Persistent)
+                .WithDataVolume(KeycloakVolumeName);
+        }
+
+        return keycloak;
     }
 }

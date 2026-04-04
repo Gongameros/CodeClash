@@ -7,12 +7,12 @@ namespace CodeClash.Courses.Tests.Infrastructure;
 
 public sealed class MongoDbFixture : IAsyncLifetime
 {
-    private readonly MongoDbContainer _container = new MongoDbBuilder().Build();
+    private readonly MongoDbContainer _container = new MongoDbBuilder("mongo:latest").Build();
 
     public IMongoClient Client { get; private set; } = null!;
     public IMongoDatabase Database { get; private set; } = null!;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await _container.StartAsync();
         MongoDbConventions.RegisterConventions();
@@ -28,5 +28,5 @@ public sealed class MongoDbFixture : IAsyncLifetime
             await Database.DropCollectionAsync(name);
     }
 
-    public async Task DisposeAsync() => await _container.StopAsync();
+    public async ValueTask DisposeAsync() => await _container.StopAsync();
 }

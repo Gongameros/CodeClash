@@ -75,11 +75,11 @@ public partial class CreateCourse
             if (result is not null)
             {
                 if (_form.IsPublished)
-                    await CoursesApi.UpdateCourseAsync(result.CourseId,
+                    await CoursesApi.UpdateCourseAsync(result.Id,
                         new UpdateCourseRequest(null, null, null, null, null, null, true));
 
                 Snackbar.Add("Course created successfully!", Severity.Success);
-                Navigation.NavigateTo($"/courses/{result.CourseId}");
+                Navigation.NavigateTo($"/courses/{result.Id}");
             }
         }
         catch

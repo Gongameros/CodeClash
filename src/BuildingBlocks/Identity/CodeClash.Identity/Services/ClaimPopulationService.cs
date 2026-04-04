@@ -16,8 +16,7 @@ public class ClaimPopulationService : IClaimPopulationService
 {
     public void PopulateFromClaims(object obj, ClaimsPrincipal user)
     {
-        if (obj == null)
-            throw new ArgumentNullException(nameof(obj));
+        ArgumentNullException.ThrowIfNull(obj);
 
         if (!user.Identity?.IsAuthenticated ?? true)
             return;

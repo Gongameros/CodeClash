@@ -2,6 +2,7 @@
   <Folder Name="/SolutionItems/">
     <File Path=".dockerignore" />
     <File Path=".editorconfig" />
+    <File Path="coverlet.runsettings" />
     <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/" />
@@ -11,10 +12,16 @@
     <Project Path="src/Services/AspireHost/CodeClash.Shared/CodeClash.Shared.csproj" />
   </Folder>
   <Folder Name="/src/BuildingBlocks/">
-    <Project Path="src/BuildingBlocks/CodeClash.Identity/CodeClash.Identity.csproj" />
     <Project Path="src/BuildingBlocks/CodeClash.MongoDB/CodeClash.MongoDB.csproj" />
     <Project Path="src/BuildingBlocks/CodeClash.Utilities/CodeClash.Utilities.csproj" />
-    <Project Path="src\BuildingBlocks\CodeClash.Results\CodeClash.Results.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/Identity/">
+    <Project Path="src/BuildingBlocks/Identity/CodeClash.Identity/CodeClash.Identity.csproj" />
+    <Project Path="src/BuildingBlocks/Identity/CodeClash.Identity.Tests/CodeClash.Identity.Tests.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/Results/">
+    <Project Path="src/BuildingBlocks/Results/CodeClash.Results/CodeClash.Results.csproj" />
+    <Project Path="src/BuildingBlocks/Results/CodeClash.Results.Tests/CodeClash.Results.Tests.csproj" />
   </Folder>
   <Folder Name="/src/Coders/">
     <Project Path="src/Services/Coders/CodeClash.Coders.Messages/CodeClash.Coders.Messages.csproj" />
@@ -31,5 +38,8 @@
   </Folder>
   <Folder Name="/src/Web/">
     <Project Path="src/Services/Web/CodeClash.Web/CodeClash.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CodeClash.E2E.Tests/CodeClash.E2E.Tests.csproj" />
   </Folder>
 </Solution>

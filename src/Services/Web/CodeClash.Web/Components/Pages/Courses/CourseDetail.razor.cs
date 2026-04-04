@@ -130,7 +130,7 @@ public partial class CourseDetail
 
     private async Task DeleteModule(ModuleResponse module)
     {
-        var confirmed = await DialogService.ShowMessageBox("Delete Module",
+        var confirmed = await DialogService.ShowMessageBoxAsync("Delete Module",
             $"Are you sure you want to delete '{module.Title}' and all its lessons?",
             yesText: "Delete", cancelText: "Cancel");
         if (confirmed != true) return;
@@ -146,7 +146,7 @@ public partial class CourseDetail
 
     private async Task DeleteLesson(string moduleId, LessonResponse lesson)
     {
-        var confirmed = await DialogService.ShowMessageBox("Delete Lesson",
+        var confirmed = await DialogService.ShowMessageBoxAsync("Delete Lesson",
             $"Are you sure you want to delete '{lesson.Title}'?",
             yesText: "Delete", cancelText: "Cancel");
         if (confirmed != true) return;
@@ -162,7 +162,7 @@ public partial class CourseDetail
 
     private async Task DeleteCourse()
     {
-        var confirmed = await DialogService.ShowMessageBox("Delete Course",
+        var confirmed = await DialogService.ShowMessageBoxAsync("Delete Course",
             $"Are you sure you want to delete '{_course!.Title}'? This action cannot be undone.",
             yesText: "Delete", cancelText: "Cancel");
         if (confirmed != true) return;

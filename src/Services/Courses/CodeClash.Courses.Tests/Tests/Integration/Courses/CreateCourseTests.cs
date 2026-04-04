@@ -9,13 +9,13 @@ namespace CodeClash.Courses.Tests.Tests.Integration.Courses;
 [Collection(IntegrationCollection.Name)]
 public sealed class CreateCourseTests(IntegrationFixture fixture) : IAsyncLifetime
 {
-    public Task InitializeAsync() => fixture.ResetAsync();
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => new(fixture.ResetAsync());
+    public ValueTask DisposeAsync() => default;
 
     [Fact]
     public async Task Handle_ValidCommand_ReturnsCourseId()
     {
-        var result = await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Learn C#"));
+        var result = await fixture.Mediator.Send(CourseFactory.CreateCommand(title: "Learn C#"), Ct.Token);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldNotBeNullOrEmpty();
@@ -32,9 +32,9 @@ public sealed class CreateCourseTests(IntegrationFixture fixture) : IAsyncLifeti
             tags: ["csharp"],
             thumbnailUrl: "https://example.com/thumb.png");
 
-        var result = await fixture.Mediator.Send(command);
+        var result = await fixture.Mediator.Send(command, Ct.Token);
 
-        var course = await fixture.Courses.Find(c => c.Id == result.Value.Id).FirstOrDefaultAsync();
+        var course = await fixture.Courses.Find(c => c.Id == result.Value.Id).FirstOrDefaultAsync(Ct.Token);
         course.ShouldNotBeNull();
         course.AuthorId.ShouldBe("author-1");
         course.Title.ShouldBe("Learn C#");
@@ -49,7 +49,7 @@ public sealed class CreateCourseTests(IntegrationFixture fixture) : IAsyncLifeti
     {
         var result = await fixture.Mediator.Send(
             new CreateCourseCommand("author-1", "", "A description.", [CodingTechnology.CSharp],
-                CourseDifficulty.Beginner, [], null));
+                CourseDifficulty.Beginner, [], null), Ct.Token);
 
         result.IsFailure.ShouldBeTrue();
         result.Errors.ShouldNotBeEmpty();
@@ -60,7 +60,7 @@ public sealed class CreateCourseTests(IntegrationFixture fixture) : IAsyncLifeti
     {
         var result = await fixture.Mediator.Send(
             new CreateCourseCommand("author-1", "Valid Title", "", [CodingTechnology.CSharp],
-                CourseDifficulty.Beginner, [], null));
+                CourseDifficulty.Beginner, [], null), Ct.Token);
 
         result.IsFailure.ShouldBeTrue();
         result.Errors.ShouldNotBeEmpty();
@@ -71,7 +71,7 @@ public sealed class CreateCourseTests(IntegrationFixture fixture) : IAsyncLifeti
     {
         var result = await fixture.Mediator.Send(
             new CreateCourseCommand("author-1", "Valid Title", "Valid description.", [],
-                CourseDifficulty.Beginner, [], null));
+                CourseDifficulty.Beginner, [], null), Ct.Token);
 
         result.IsFailure.ShouldBeTrue();
         result.Errors.ShouldNotBeEmpty();
@@ -81,7 +81,7 @@ public sealed class CreateCourseTests(IntegrationFixture fixture) : IAsyncLifeti
     public async Task Handle_TitleExceedsMaxLength_ReturnsValidationFailure()
     {
         var result = await fixture.Mediator.Send(
-            CourseFactory.CreateCommand(title: new string('A', 201)));
+            CourseFactory.CreateCommand(title: new string('A', 201)), Ct.Token);
 
         result.IsFailure.ShouldBeTrue();
     }

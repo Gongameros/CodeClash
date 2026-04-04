@@ -34,7 +34,7 @@ public partial class MyCourses
 
     private async Task DeleteCourse(CourseListItem course)
     {
-        var confirmed = await DialogService.ShowMessageBox(
+        var confirmed = await DialogService.ShowMessageBoxAsync(
             "Delete Course",
             $"Delete '{course.Title}'? This will also remove all modules and lessons.",
             yesText: "Delete", cancelText: "Cancel");

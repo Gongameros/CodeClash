@@ -4,6 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>9c874363-6f61-4d68-9210-abe210b697a9</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\BuildingBlocks\CodeClash.Identity\CodeClash.Identity.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\Identity\CodeClash.Identity\CodeClash.Identity.csproj" />
       <ProjectReference Include="..\..\AspireHost\CodeClash.ServiceDefaults\CodeClash.ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\AspireHost\CodeClash.Shared\CodeClash.Shared.csproj" />
     </ItemGroup>
