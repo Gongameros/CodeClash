@@ -9,9 +9,10 @@ var builder = DistributedApplication.CreateBuilder(args);
 ServiceProvider serviceProvider = builder.Services.BuildServiceProvider();
 
 string normalisedEnvName = builder.Environment.EnvironmentName.ToLowerInvariant();
-builder.AddAzureContainerAppEnvironment($"cae-{normalisedEnvName}");
+builder.AddAzureContainerAppEnvironment("cc");
 // var internalApiKey = builder.AddParameter("internal-api-key", secret: true);
 
+// Keycloak is only managed by Aspire locally; deployed externally in Azure
 var keycloak = builder.AddKeycloakResource();
 
 var mongoDb = builder.AddMongoDbResource(Resources.MongoDb);
@@ -33,14 +34,15 @@ var mongoDb = builder.AddMongoDbResource(Resources.MongoDb);
 //     .WithEnvironment("InternalApiKey", internalApiKey);
 
 var courses = builder.AddProject<Projects.CodeClash_Courses>(Resources.CoursesService)
+    .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
     .WithScalar("scalar", "Scalar - Courses API")
     // .WaitFor(coursesBlobStorage)
     .WaitFor(mongoDb)
-    .WaitFor(keycloak)
     // .WithReference(coursesBlobStorage)
     .WithReference(mongoDb)
-    .WithReference(keycloak)
+    .WithEnvironment("Keycloak__Realm", "codeclash")
+    .WithEnvironment("Keycloak__Audience", "codeclash-api")
     .PublishAsAzureContainerApp((infrastructure, app) =>
     {
         app.Template.Scale.MinReplicas = 0;
@@ -67,12 +69,16 @@ var courses = builder.AddProject<Projects.CodeClash_Courses>(Resources.CoursesSe
 //     .WithReference(coders)
 //     .WithEnvironment("InternalApiKey", internalApiKey);
 
-builder.AddProject<Projects.CodeClash_Web>(Resources.WebService)
+var keycloakClientSecret = builder.AddParameter("keycloak-client-secret", secret: true);
+
+var web = builder.AddProject<Projects.CodeClash_Web>(Resources.WebService)
+    .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
-    .WaitFor(keycloak)
     .WaitFor(courses)
-    .WithReference(keycloak)
     .WithReference(courses)
+    .WithEnvironment("Keycloak__Realm", "codeclash")
+    .WithEnvironment("Keycloak__ClientId", "codeclash-web")
+    .WithEnvironment("Keycloak__ClientSecret", keycloakClientSecret)
     .PublishAsAzureContainerApp((infrastructure, app) =>
     {
         app.Template.Scale.MinReplicas = 0;
@@ -87,5 +93,20 @@ builder.AddProject<Projects.CodeClash_Web>(Resources.WebService)
             }
         });
     });
+
+if (keycloak is not null)
+{
+    courses.WaitFor(keycloak).WithReference(keycloak);
+    web.WaitFor(keycloak).WithReference(keycloak);
+}
+else
+{
+    // In publish mode, Keycloak is external — pass URL directly, bypassing service discovery
+    // e.g. "https://keycloakwebapp-xxx.azurewebsites.net"
+    var keycloakBaseUrl = builder.AddParameter("keycloak-base-url");
+    courses.WithEnvironment("Keycloak__BaseUrl", keycloakBaseUrl);
+    web.WithEnvironment("Keycloak__BaseUrl", keycloakBaseUrl);
+    web.WithEnvironment("CODECLASH_KEYCLOAK_HTTPS", keycloakBaseUrl);
+}
 
 builder.Build().Run();

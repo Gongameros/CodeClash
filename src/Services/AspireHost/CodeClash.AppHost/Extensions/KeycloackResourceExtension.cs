@@ -1,4 +1,4 @@
-﻿using CodeClash.Shared.Constants;
+using CodeClash.Shared.Constants;
 
 namespace CodeClash.AppHost.Extensions;
 
@@ -7,9 +7,13 @@ public static class KeycloakResourceExtension
     private const int KeycloakPort = 8079;
     private const string KeycloakVolumeName = "codeclash-keycloak-data";
 
-    public static IResourceBuilder<KeycloakResource> AddKeycloakResource(
+    public static IResourceBuilder<KeycloakResource>? AddKeycloakResource(
         this IDistributedApplicationBuilder builder)
     {
+        // Keycloak is deployed and managed externally in Azure
+        if (builder.ExecutionContext.IsPublishMode)
+            return null;
+
         var isE2E = builder.Configuration["Testing:IsE2E"] == "true";
 
         var keycloakUsername = builder.AddParameter("keycloak-username", "admin");
@@ -22,12 +26,7 @@ public static class KeycloakResourceExtension
                 adminUsername: keycloakUsername,
                 adminPassword: keycloakPassword)
             .WithRealmImport("KeycloakRealms")
-            .WithEndpoint("http", endpoint =>
-            {
-                endpoint.IsExternal = true;
-                endpoint.Port = null;
-                endpoint.TargetPort = 8080;
-            })
+            .WithExternalHttpEndpoints()
             .WithOtlpExporter();
 
         if (!isE2E)

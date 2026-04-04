@@ -7,6 +7,10 @@ name: CD Template
 #   AZURE_CLIENT_ID        — App Registration client ID (for OIDC federated login)
 #   AZURE_TENANT_ID        — Azure tenant ID
 #   AZURE_SUBSCRIPTION_ID  — Azure subscription ID
+#   KEYCLOAK_USERNAME      — Keycloak admin username
+#   KEYCLOAK_PASSWORD      — Keycloak admin password
+#   MONGO_USERNAME         — MongoDB username
+#   MONGO_PASSWORD         — MongoDB password
 #
 # Required GitHub Environment variables (per environment):
 #   AZURE_LOCATION         — Azure region, e.g. "westeurope"
@@ -40,6 +44,18 @@ on:
         required: true
       INTERNAL_API_KEY:
         required: false
+      KEYCLOAK_USERNAME:
+        required: true
+      KEYCLOAK_PASSWORD:
+        required: true
+      MONGO_USERNAME:
+        required: true
+      MONGO_PASSWORD:
+        required: true
+      MONGO_CONNECTION_STRING:
+        required: true
+      KEYCLOAK_CLIENT_SECRET:
+        required: true
 
 jobs:
   deploy:
@@ -62,6 +78,8 @@ jobs:
 
       - name: Install Azure Developer CLI
         uses: azure/setup-azd@v2
+        with:
+          version: 'latest'
 
       - name: Login to Azure (OIDC)
         uses: azure/login@v2
@@ -76,6 +94,7 @@ jobs:
             --client-id "${{ secrets.AZURE_CLIENT_ID }}" \
             --federated-credential-provider "github" \
             --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
+
 
       - name: Initialize azd environment
         run: |
@@ -92,6 +111,12 @@ jobs:
           if [ -n "${{ inputs.build-version }}" ]; then
             azd env set BUILD_VERSION "${{ inputs.build-version }}"
           fi
+          azd env set AZURE_MONGO_CONNECTION_STRING "${{ secrets.MONGO_CONNECTION_STRING }}"
+          azd env set mongo_connection_string "${{ secrets.MONGO_CONNECTION_STRING }}"
+          azd env set AZURE_KEYCLOAK_CLIENT_SECRET "${{ secrets.KEYCLOAK_CLIENT_SECRET }}"
+          azd env set keycloak_client_secret "${{ secrets.KEYCLOAK_CLIENT_SECRET }}"
+          azd env set AZURE_KEYCLOAK_BASE_URL "${{ vars.KEYCLOAK_BASE_URL }}"
+          azd env set keycloak_base_url "${{ vars.KEYCLOAK_BASE_URL }}"
 
       - name: Provision infrastructure
         run: azd provision --no-prompt
@@ -106,6 +131,9 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+          AZURE_KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          AZURE_KEYCLOAK_BASE_URL: ${{ secrets.KEYCLOAK_BASE_URL }}
 
       - name: Print deployment endpoints
         run: azd show --output json | jq '.services[].endpoints'

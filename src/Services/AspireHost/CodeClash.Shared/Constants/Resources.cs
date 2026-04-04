@@ -1,4 +1,4 @@
-﻿namespace CodeClash.Shared.Constants;
+namespace CodeClash.Shared.Constants;
 
 public static class Resources
 {
@@ -8,8 +8,8 @@ public static class Resources
     public const string WebService = "codeclash-web";
     public const string KeyVault = "codeclash-keyvault";
     public const string Storage = "codeclash-storage";
-    public const string MongoDb = "codeclash-mongo-server";
-    public const string CoursesBlob = "codeclash-courses-blob";
-    public const string CodersBlob = "codeclash-coders-blob";
-    public const string Keycloak = "codeclash-keycloak";
+    public const string MongoDb = "cc-mongo";
+    public const string CoursesBlob = "cc-courses-blob";
+    public const string CodersBlob = "cc-coders-blob";
+    public const string Keycloak = "cc-keycloak";
 }

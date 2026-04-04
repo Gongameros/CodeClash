@@ -7,6 +7,7 @@
     <PackageVersion Include="Aspire.Azure.Security.KeyVault" Version="13.2.0" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.2.1" />
     <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.2.1" />
+    <PackageVersion Include="Aspire.Hosting.Azure.CosmosDB" Version="13.2.1" />
     <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.2.1" />
     <PackageVersion Include="Aspire.Hosting.Keycloak" Version="13.2.1-preview.1.26180.6" />
     <PackageVersion Include="Aspire.Hosting.MongoDB" Version="13.2.1" />

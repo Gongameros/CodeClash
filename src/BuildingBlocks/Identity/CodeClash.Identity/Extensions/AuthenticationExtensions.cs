@@ -30,21 +30,40 @@ public static class AuthenticationExtensions
             throw new InvalidOperationException("Keycloak:Audience configuration is required.");
         }
 
-        var authBuilder = builder.Services.AddAuthentication()
-            .AddKeycloakJwtBearer(
-                serviceName: serviceName,
-                realm: keycloakOptions.Realm,
-                options =>
-                {
-                    options.Audience = keycloakOptions.Audience;
-                    if (builder.Environment.IsDevelopment())
-                    {
-                        options.TokenValidationParameters.ValidateIssuer = false;
-                        options.RequireHttpsMetadata = false;
-                    }
+        AuthenticationBuilder authBuilder;
 
+        if (!string.IsNullOrEmpty(keycloakOptions.BaseUrl))
+        {
+            // Direct URL mode — bypass Aspire service discovery (used in Azure)
+            var authority = $"{keycloakOptions.BaseUrl.TrimEnd('/')}/realms/{keycloakOptions.Realm}";
+            authBuilder = builder.Services.AddAuthentication()
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = authority;
+                    options.Audience = keycloakOptions.Audience;
+                    options.RequireHttpsMetadata = false;
                     configureOptions?.Invoke(options);
                 });
+        }
+        else
+        {
+            // Service discovery mode (local development via Aspire)
+            authBuilder = builder.Services.AddAuthentication()
+                .AddKeycloakJwtBearer(
+                    serviceName: serviceName,
+                    realm: keycloakOptions.Realm,
+                    options =>
+                    {
+                        options.Audience = keycloakOptions.Audience;
+                        options.RequireHttpsMetadata = false;
+                        if (builder.Environment.IsDevelopment())
+                        {
+                            options.TokenValidationParameters.ValidateIssuer = false;
+                        }
+
+                        configureOptions?.Invoke(options);
+                    });
+        }
 
         builder.Services.AddAuthorization();
         return authBuilder;
@@ -62,31 +81,34 @@ public static class AuthenticationExtensions
         if (string.IsNullOrEmpty(keycloakOptions.Realm))
             throw new InvalidOperationException("Keycloak:Realm configuration is required.");
 
-        var authBuilder = builder.Services
-            .AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            })
-            .AddCookie(options =>
-            {
-                options.Cookie.HttpOnly = true;
-                options.Cookie.SameSite = SameSiteMode.Lax;
-                configureCookie?.Invoke(options);
-            })
-            .AddKeycloakOpenIdConnect(
-                serviceName: serviceName,
-                realm: keycloakOptions.Realm,
-                options =>
+        AuthenticationBuilder authBuilder;
+
+        if (!string.IsNullOrEmpty(keycloakOptions.BaseUrl))
+        {
+            // Direct URL mode — bypass Aspire service discovery (used in Azure)
+            var authority = $"{keycloakOptions.BaseUrl.TrimEnd('/')}/realms/{keycloakOptions.Realm}";
+            authBuilder = builder.Services
+                .AddAuthentication(options =>
                 {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                })
+                .AddCookie(options =>
+                {
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    configureCookie?.Invoke(options);
+                })
+                .AddOpenIdConnect(options =>
+                {
+                    options.Authority = authority;
                     options.ClientId = keycloakOptions.ClientId;
                     options.ClientSecret = keycloakOptions.ClientSecret;
                     options.ResponseType = OpenIdConnectResponseType.Code;
                     options.SaveTokens = true;
                     options.GetClaimsFromUserInfoEndpoint = true;
-
-                    if (builder.Environment.IsDevelopment())
-                        options.RequireHttpsMetadata = false;
+                    options.RequireHttpsMetadata = false;
+                    options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
 
                     options.Scope.Clear();
                     options.Scope.Add("openid");
@@ -100,6 +122,47 @@ public static class AuthenticationExtensions
 
                     configureOidc?.Invoke(options);
                 });
+        }
+        else
+        {
+            // Service discovery mode (local development via Aspire)
+            authBuilder = builder.Services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                })
+                .AddCookie(options =>
+                {
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    configureCookie?.Invoke(options);
+                })
+                .AddKeycloakOpenIdConnect(
+                    serviceName: serviceName,
+                    realm: keycloakOptions.Realm,
+                    options =>
+                    {
+                        options.ClientId = keycloakOptions.ClientId;
+                        options.ClientSecret = keycloakOptions.ClientSecret;
+                        options.ResponseType = OpenIdConnectResponseType.Code;
+                        options.SaveTokens = true;
+                        options.GetClaimsFromUserInfoEndpoint = true;
+                        options.RequireHttpsMetadata = false;
+
+                        options.Scope.Clear();
+                        options.Scope.Add("openid");
+                        options.Scope.Add("profile");
+                        options.Scope.Add("email");
+                        options.Scope.Add("offline_access");
+
+                        options.MapInboundClaims = false;
+                        options.TokenValidationParameters.NameClaimType = "preferred_username";
+                        options.TokenValidationParameters.RoleClaimType = "roles";
+
+                        configureOidc?.Invoke(options);
+                    });
+        }
 
         builder.Services.AddAuthorization();
         return authBuilder;
