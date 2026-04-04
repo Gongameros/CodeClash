@@ -9,6 +9,8 @@ on:
         type: string
         required: true
 
+
+
 concurrency:
   group: production-deploy
   cancel-in-progress: false   # do not cancel in-flight production deploys
@@ -37,6 +39,9 @@ jobs:
   cd:
     name: CD
     needs: ci
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/codeclash-cd-template.yml
     with:
       environment: production

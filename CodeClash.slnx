@@ -2,6 +2,7 @@
   <Folder Name="/SolutionItems/">
     <File Path=".dockerignore" />
     <File Path=".editorconfig" />
+    <File Path="azure.yaml" />
     <File Path="coverlet.runsettings" />
     <File Path="Directory.Packages.props" />
   </Folder>

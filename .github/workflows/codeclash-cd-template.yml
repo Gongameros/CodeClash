@@ -93,11 +93,6 @@ jobs:
             azd env set BUILD_VERSION "${{ inputs.build-version }}"
           fi
 
-      - name: Set Aspire parameters
-        if: ${{ secrets.INTERNAL_API_KEY != '' }}
-        run: |
-          azd env set INTERNAL_API_KEY "${{ secrets.INTERNAL_API_KEY }}"
-
       - name: Provision infrastructure
         run: azd provision --no-prompt
         env:
